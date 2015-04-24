@@ -44,6 +44,15 @@ public class CharactersManager {
 			return characters.size();
 		}
 		
+		/* Return character with charId, or null if none is found */
+		public Player getCharacter(int charId){
+			for(int i = 0; i < characters.size(); i++){
+				if(characters.get(i).getId() == charId)
+					return characters.get(i);
+			}
+			return null;
+		}
+		
 		public boolean equals(Object obj){
 			if(obj instanceof Account){
 				return accountId == ((Account) obj).getId();
@@ -135,6 +144,7 @@ public class CharactersManager {
 	/* Returns false if character with same name already exists */
 	public boolean createNewCharacter(Account acc, Player character){
 		int accIndex = 0;
+		int newCharId = 0;
 		for(int i = 0; i < characters.size(); i++){
 			if(acc.getId() == characters.get(i).getAccountId()){
 				accIndex = i;
@@ -144,12 +154,24 @@ public class CharactersManager {
 				if(chars.get(j).getName().equals(character.getName())){
 					return false;
 				}
+				if(chars.get(j).getId() > newCharId)
+					newCharId = chars.get(j).getId();
 			}
 		}
+		newCharId += 1;
 		//TODO: Set character's default values here
+		character.setId(newCharId);
 		characters.get(accIndex).getCharacters().add(character);
 		charCount++;
 		Log.info("New character '" + character.getName() + "' created");
 		return true;
+	}
+
+	/* Returns character, or null if not found */
+	public Player getCharacter(Account acc, int charId){
+		AccountCharacters chars = getAccCharacters(acc);
+		if(chars == null)
+			return null;
+		return chars.getCharacter(charId);
 	}
 }

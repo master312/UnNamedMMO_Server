@@ -34,4 +34,10 @@ public class OpCodes {
 	/* Sends login info to server
 	 * CL_LOGIN (str)UserName (str)Password */
 	public static final short CL_LOGIN = 0x0001;
+	/* Sends character id selected for entering game 
+	 * CL_ENTER_WORLD (int)charId*/
+	public static final short CL_ENTER_WORLD = 0x0002;
+	/* Lets server know that client has moved 
+	 * CL_MOVE (short)Dir 0=up;2=right;4=down;6=left*/
+	public static final short CL_MOVE = 0x0003;
 }

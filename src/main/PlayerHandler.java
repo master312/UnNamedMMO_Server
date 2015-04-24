@@ -33,6 +33,8 @@ public class PlayerHandler extends Listener{
 	private long disconnectTime = 0;
 	/* Players user name and password */
 	private Account account = null;
+	/* Player character */
+	private Player character = null;
 	
 	public PlayerHandler(Connection cl){
 		client = cl;
@@ -75,7 +77,7 @@ public class PlayerHandler extends Listener{
 			return;
 		}
 		
-		short opCode = pack.readShort();
+		short opCode = pack.readShort(); 
 		switch(opCode){
 		case OpCodes.CL_LOGIN:
 			account = Common.getAccountsManagerSt().new Account();
@@ -87,6 +89,22 @@ public class PlayerHandler extends Listener{
 			}else{
 				//Login fail
 				disconnect();
+			}
+			character = null;
+			break;
+		case OpCodes.CL_ENTER_WORLD:
+			//Player entered world
+			int charId = pack.readInt();
+			character = Common.getCharactersManagerSt()
+								.getCharacter(account, charId);
+			if(character == null){
+				Log.error("Invalid character ID received from player");
+				disconnect();
+			}else{
+				Common.removePlayerSt(this);	//Remove player from preGame list
+				state = PlayerState.IN_GAME;
+				Common.addPlayerToListSt(this); //Add player to inGame list
+				Log.info("Player entered game with char " + character.getName());
 			}
 			break;
 		}

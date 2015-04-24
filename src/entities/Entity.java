@@ -13,12 +13,16 @@ public class Entity {
 		NORTHWEST { public String toString() { return "NORTHWEST"; } }
 	}
 	public enum EntityType{
-		UNDEFINED, MONSTER, NPC, PLAYER
+		UNDEFINED{ public String toString(){ return "UNDEFINED"; } }, 
+		MONSTER{ public String toString(){ return "MONSTER"; } },
+		NPC{ public String toString(){ return "NPC"; } },
+		PLAYER{ public String toString(){ return "PLAYER"; } }
 	}
 	
 	private EntityType type = EntityType.UNDEFINED;
 	private int id = -1;
-	private int locX = 0, locY = 0, width = 0, height = 0;
+	private float locX = 0f, locY = 0f; 
+	private int width = 0, height = 0;
 	private int spriteId = -1;
 	private String name = "";
 	
@@ -29,9 +33,9 @@ public class Entity {
 	public boolean isMonster() { return type == EntityType.MONSTER; }
 	public boolean isNpc() { return type == EntityType.NPC; }
 	public boolean isPlayer() { return type == EntityType.PLAYER; }
-
+	public boolean isPawn() { return isMonster() || isNpc() || isPlayer(); }
 	
-	public void move(int x, int y){
+	public void move(float x, float y){
 		locX += x;
 		locY += y;
 	}
@@ -60,19 +64,19 @@ public class Entity {
 		this.id = id;
 	}
 
-	public int getLocX() {
+	public float getLocX() {
 		return locX;
 	}
 
-	public void setLocX(int locX) {
+	public void setLocX(float locX) {
 		this.locX = locX;
 	}
 
-	public int getLocY() {
+	public float getLocY() {
 		return locY;
 	}
 
-	public void setLocY(int locY) {
+	public void setLocY(float locY) {
 		this.locY = locY;
 	}
 
