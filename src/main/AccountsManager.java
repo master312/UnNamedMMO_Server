@@ -108,12 +108,14 @@ public class AccountsManager {
 				line = br.readLine();
 			}
 			
+			br.close();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
 		Log.info("Loaded " + accounts.size() + " accounts");
 	}
 	
