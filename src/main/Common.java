@@ -24,7 +24,7 @@ public class Common {
 	private static final int PLAYER_OBJECT_TIMEOUT = 5000;
 	/* Player connection timeout */
 	public static final int CONNECTION_TIMEOUT = 5000;
-	/* Maximum number of character pre account */
+	/* Maximum number of character on account */
 	public static final int MAXIMUM_ACC_CHAR_NUMBER = 5;
 	/* View distance in pixels */
 	public static final int ENTITY_VIEW_DISTANCE = 4000;
@@ -44,7 +44,8 @@ public class Common {
 	
 	public Common(){
 		serverSocket = new ServerSocket(LISTEN_PORT_TCP, 
-				LISTEN_PORT_UDP, MAXIMUM_CONNECTED);
+										LISTEN_PORT_UDP, 
+										MAXIMUM_CONNECTED);
 		accountManager = new AccountsManager();
 		charactersManager = new CharactersManager();
 		gameManager = new GameManager();
@@ -104,7 +105,8 @@ public class Common {
 		return commonClass.getInGamePlayers();
 	}
 	
-	/* Adds new player to players array list */
+	/* Adds new player to players array list
+	 * List is chosen based on player state */
 	public void addPlayerToList(PlayerHandler player){
 		if(player.getState() == PlayerState.IN_GAME){
 			inGamePlayers.add(player);
@@ -121,7 +123,7 @@ public class Common {
 	
 	/* Removes player from array list 
 	 * WARNING: Player MUST be on the list. 
-	 * If not this function may crush program*/
+	 * If not this function may crush program */
 	public void removePlayer(PlayerHandler player){
 		if(preGamePlayers.contains(player)){
 			preGamePlayers.remove(player);
@@ -150,43 +152,28 @@ public class Common {
 		}
 		lastClear = System.currentTimeMillis();
 		boolean tmpB = false;
-		tmpB = clearTickPreGame();
-		tmpB = tmpB | clearTickInGame();
+		tmpB = handleClearTick(getInGamePlayersSt());
+		tmpB = tmpB | handleClearTick(getPreGamePlayersSt());
 		if(tmpB){
+			//If player was deleted, run GC
 			System.gc();
 		}
 	}
-	
-	/* Return true if some player was deleted */
-	private static boolean clearTickPreGame(){
-		boolean toReturn = false;
-		for(int i = 0; i < getPreGamePlayersSt().size(); i++){
-			PlayerHandler tmpP = getPreGamePlayersSt().get(i);
-			if(tmpP.getState() == PlayerState.DISCONNECTED){
-				if(lastClear - tmpP.getDisconnectTime() > PLAYER_OBJECT_TIMEOUT){
-					if(tmpP.getConnection() != null)
-						tmpP.getConnection().close();
-					removePlayerSt(tmpP);
-					toReturn = true;
-				}
-			}
-		}
-		return toReturn;
-	}
 
-	/* Return true if some player was deleted */
-	private static boolean clearTickInGame(){
+	/* Clear timeouted players from list */
+	private static boolean handleClearTick(List<PlayerHandler> list){
 		boolean toReturn = false;
-		for(int i = 0; i < getInGamePlayersSt().size(); i++){
-			PlayerHandler tmpP = getInGamePlayersSt().get(i);
-			if(tmpP.getState() == PlayerState.DISCONNECTED){
-				if(lastClear - tmpP.getDisconnectTime() > PLAYER_OBJECT_TIMEOUT){
-					if(tmpP.getConnection() != null)
-						tmpP.getConnection().close();
-					tmpP.getCharacter().setPlayerHandler(null);
-					removePlayerSt(tmpP);
-					toReturn = true;
-				}
+		for(int i = 0; i < list.size(); i++){
+			PlayerHandler tmpP = list.get(i);
+			if(tmpP.getState() != PlayerState.DISCONNECTED){
+				//Player is still connected
+				continue;
+			}
+			if(lastClear - tmpP.getDisconnectTime() > PLAYER_OBJECT_TIMEOUT){
+				if(tmpP.getConnection() != null)
+					tmpP.getConnection().close();
+				list.remove(tmpP);
+				toReturn = true;
 			}
 		}
 		return toReturn;

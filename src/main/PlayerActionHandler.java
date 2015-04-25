@@ -4,7 +4,6 @@ import net.NetProtocol;
 import entities.Entity;
 import entities.Entity.Direction;
 import entities.Player;
-import main.PlayerHandler.PlayerAction;
 
 public class PlayerActionHandler {
 	/* Maximum player actions pre tick
@@ -12,6 +11,7 @@ public class PlayerActionHandler {
 	private static final int MAXIMUM_ACTIONS = 6;
 	private static int delta = 0;
 	
+	/* Handle all player's (pl) actions */
 	public static void handlePlayerActions(PlayerHandler pl, int _delta){
 		delta = _delta;
 		if(pl.getActionsCount() == 0){
@@ -27,6 +27,7 @@ public class PlayerActionHandler {
 		pl.clearActions();	
 	}
 	
+	/* Handle specific action for pl */
 	private static void handlePlayerAction(PlayerHandler pl, PlayerAction act){
 		switch(act.type){
 		case MOVE:
@@ -37,6 +38,7 @@ public class PlayerActionHandler {
 		}
 	}
 	
+	/* Handle movement action */
 	private static void handlePlayerMovement(PlayerHandler pl, Direction dir){
 		Player entity = pl.getCharacter();
 		float speed = ((float)entity.getCurrentSpeed() / 100) * delta;
@@ -66,15 +68,18 @@ public class PlayerActionHandler {
 			entity.move(-speed, -speed);
 			break;
 		}
+		//Send new position back to player
 		NetProtocol.srPawnUpdatePosition(pl, entity);
+		
+		//And to all players around him
 		for(int i = 0; i < pl.getEntitiesInRange().size(); i++){
 			Entity tmpEntity = pl.getEntitiesInRange().get(i);
 			if(!tmpEntity.isPlayer()){
 				continue;
 			}
 			NetProtocol.srPawnUpdatePosition(
-					((Player) tmpEntity).getPlayerHandler(), 
-					entity);
+									((Player) tmpEntity).getPlayerHandler(), 
+									entity);
 		}
 	}
 }

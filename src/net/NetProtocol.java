@@ -12,7 +12,7 @@ public class NetProtocol {
 		LOGIN_OK, LOGIN_FAIL
 	}
 	
-	//TODO: Ne svidja mi se da ovo stoji ovde
+	//TODO: This class probably should not be defined here
 	class EntityUpdates{
 		public static final short POSITION = 1;
 		public static final short DIRECTION = 2;
@@ -84,7 +84,7 @@ public class NetProtocol {
 	/* Sends whole visible entity list to client */
 	public static void srVisibleEntList(PlayerHandler cl){
 		for(int i = 0; i < cl.getEntitiesInRange().size(); i++){
-			cl.send(cl.getVisibleEntity(i), true);
+			cl.send(cl.getInRangeEntity(i), true);
 		}
 	}
 

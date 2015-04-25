@@ -18,6 +18,7 @@ public class AccountsManager {
 	public enum AccessLevel{
 		PLAYER, GAME_MASTER, ADMIN, GOD
 	}
+	
 	public class Account{
 		private int id;
 		private String username;
@@ -86,7 +87,6 @@ public class AccountsManager {
 		public void setBanned(int banned) {
 			this.banned = banned;
 		}
-		
 	}
 	
 	/* List containing all accounts */
@@ -102,26 +102,21 @@ public class AccountsManager {
 		try {
 			br = new BufferedReader(new FileReader("accounts"));
 			String line = br.readLine();
-			
 			while(line != null){
 				loadAccount(line);
 				line = br.readLine();
 			}
-			
 			br.close();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
-		
+		}		
 		Log.info("Loaded " + accounts.size() + " accounts");
 	}
 	
 	/* Create account object from string line */
 	private void loadAccount(String line){
-		
 		String elements[] = line.split(" ");
 		AccessLevel tmpLevel = null;
 		switch(Integer.parseInt(elements[2])){
@@ -131,7 +126,9 @@ public class AccountsManager {
 		case 4: tmpLevel = AccessLevel.GOD; break;
 		}
 		Account tmpAcc = new Account(accounts.size() + 1, elements[0], 
-				elements[1], tmpLevel, Integer.parseInt(elements[3]));
+									elements[1], 
+									tmpLevel, 
+									Integer.parseInt(elements[3]));
 		accounts.add(tmpAcc);
 	}
 	

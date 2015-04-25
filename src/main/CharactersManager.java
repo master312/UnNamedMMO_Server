@@ -62,6 +62,7 @@ public class CharactersManager {
 			return false;
 		}
 	}
+	
 	/* Interval on what will characters be send to players
 	 * that are on characters screen (ms)*/
 	private static final int UPDATE_INTERVAL = 1000;
@@ -92,7 +93,6 @@ public class CharactersManager {
 	public AccountCharacters loadAccountCharacters(Account account){
 		AccountCharacters ac = new AccountCharacters(account.getId());
 		int tmpCount = ac.loadCharacters();
-		System.out.println("DEBUG: Loaded " + tmpCount + " characters for account " + account.getUsername());
 		charCount += tmpCount;
 		return ac;
 	}
@@ -110,6 +110,7 @@ public class CharactersManager {
 		for(int i = 0; i < players.size(); i++){
 			PlayerHandler tmpP = players.get(i);
 			if(tmpP.getState() == PlayerState.LOGGED_IN){
+				//Player just logged in, and needs to receive character list
 				sendCharacterListToPlayer(tmpP);
 				Common.getPreGamePlayersSt()  //Changes player state to character screen
 						.get(i)
@@ -127,11 +128,13 @@ public class CharactersManager {
 		List<Player> chars = tChars.getCharacters();
 		NetProtocol.srCharCount(player, (short)chars.size());
 		for(int j = 0; j < chars.size(); j++){
-			//Sending player entity objects to client
+			//Sending player entity (character) object to client
 			NetProtocol.srEntPlayer(player, chars.get(j));
 		}
 	}
 	
+	/* Return AccountCharacters object for acc.
+	 * Return null if not found */
 	public AccountCharacters getAccCharacters(Account acc){
 		for(int i = 0; i < characters.size(); i++){
 			if(characters.get(i).getAccountId() == acc.getId()){
@@ -141,7 +144,8 @@ public class CharactersManager {
 		return null;
 	}
 	
-	/* Returns false if character with same name already exists */
+	/* Returns false if character with same name already exists 
+	 * Returns true if character was created successfully */
 	public boolean createNewCharacter(Account acc, Player character){
 		int accIndex = 0;
 		int newCharId = 0;
@@ -152,6 +156,7 @@ public class CharactersManager {
 			List<Player> chars = characters.get(i).getCharacters();
 			for(int j = 0; j < chars.size(); j++){
 				if(chars.get(j).getName().equals(character.getName())){
+					//Character with same name already exists
 					return false;
 				}
 				if(chars.get(j).getId() > newCharId)

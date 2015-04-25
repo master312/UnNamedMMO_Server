@@ -31,31 +31,9 @@ public class PlayerHandler extends Listener{
 		OK, INVALID_NAME, NOT_ALLOWED
 	}
 	
-	public enum PlayerActionType{
-		NOTHING, MOVE
-	}
-	
-	public class PlayerAction{
-		public PlayerActionType type = PlayerActionType.NOTHING;
-		public List<Object> values = new ArrayList<Object>();
-		
-		public PlayerAction(PlayerActionType _type){
-			type = _type;
-		}
-	}
-	
-	/* Direction ID's received over network */
-	private static final int DIRECTION_NORT = 0;
-	private static final int DIRECTION_NORTHEAST = 1;
-	private static final int DIRECTION_EAST = 2;
-	private static final int DIRECTION_SOUTHEAST = 3;
-	private static final int DIRECTION_SOUTH = 4;
-	private static final int DIRECTION_SOUTHWEST = 5;
-	private static final int DIRECTION_WEST = 6;
-	private static final int DIRECTION_NORTHWEST = 7;
-	
 	/* Player network client object */
 	private Connection client = null;
+	/* Current player state */
 	private PlayerState state = null;
 	/* Time when this player was disconnected (if disconnected) */
 	private long disconnectTime = 0;
@@ -80,7 +58,7 @@ public class PlayerHandler extends Listener{
 		NetProtocol.srLoginReady(this);	//Sends ready signal to client
 	}
 	
-	/* Called when when packet is received */
+	/* Called when when data is received */
 	public void received(Connection c, Object p){
 		if(p instanceof Packet){
 			Packet tmpP = (Packet) p;
@@ -93,8 +71,9 @@ public class PlayerHandler extends Listener{
 		}else if(p instanceof Player){
 			//Player created new character
 			if(state != PlayerState.CHARACTER_SCREEN){
+				//Characters can ONLY be created on character screen state
 				return;
-			}//Characters can ONLY be created on character screen state
+			}
 			handleNewCharacter((Player) p);
 		}
 	}
@@ -113,6 +92,7 @@ public class PlayerHandler extends Listener{
 		short opCode = pack.readShort(); 
 		switch(opCode){
 		case OpCodes.CL_LOGIN:
+			//Login packet
 			account = Common.getAccountsManagerSt().new Account();
 			account.setUsername(pack.readString());
 			account.setPassword(pack.readString());
@@ -129,7 +109,7 @@ public class PlayerHandler extends Listener{
 			//Player entered world
 			int charId = pack.readInt();
 			character = Common.getCharactersManagerSt()
-								.getCharacter(account, charId);
+												.getCharacter(account, charId);
 			if(character == null){
 				Log.error("Invalid character ID received from player");
 				disconnect();
@@ -138,7 +118,6 @@ public class PlayerHandler extends Listener{
 				state = PlayerState.IN_GAME;
 				Common.addPlayerToListSt(this); //Add player to inGame list
 				character.setPlayerHandler(this);
-				Log.info("Player entered game with char " + character.getName());
 			}
 			break;
 		}
@@ -149,7 +128,7 @@ public class PlayerHandler extends Listener{
 		short opCode = pack.readShort();
 		switch(opCode){
 		case OpCodes.CL_MOVE:
-			handleMovementPacket(pack);
+			actions.add(PlayerActionGenerator.genMovement(pack));
 			break;
 		}
 	}
@@ -161,10 +140,12 @@ public class PlayerHandler extends Listener{
 		if(ac.getCharactersCount() < Common.MAXIMUM_ACC_CHAR_NUMBER){
 			//If there is space on account for new character
 			if(!cm.createNewCharacter(account, character)){
+				//Character with this name already exists
 				NetProtocol.srCharCreateStatus(this, 
-										CharacterCreateStatus.INVALID_NAME);
+									CharacterCreateStatus.INVALID_NAME);
 				return;
 			}
+			//Character created succsessfully
 			NetProtocol.srCharCreateStatus(this, CharacterCreateStatus.OK);
 			cm.sendCharacterListToPlayer(this);
 		}else{
@@ -172,38 +153,6 @@ public class PlayerHandler extends Listener{
 			NetProtocol.srCharCreateStatus(this, 
 											CharacterCreateStatus.NOT_ALLOWED);
 		}
-	}
-	
-	private void handleMovementPacket(Packet pack){
-		PlayerAction tmpAction = new PlayerAction(PlayerActionType.MOVE);
-		switch(pack.readShort()){
-		//Switch direction
-		case DIRECTION_NORT:
-			tmpAction.values.add(Entity.Direction.NORTH);
-			break;
-		case DIRECTION_NORTHEAST:
-			tmpAction.values.add(Entity.Direction.NORTHEAST);
-			break;
-		case DIRECTION_EAST:
-			tmpAction.values.add(Entity.Direction.EAST);
-			break;
-		case DIRECTION_SOUTHEAST:
-			tmpAction.values.add(Entity.Direction.SOUTHEAST);
-			break;
-		case DIRECTION_SOUTH:
-			tmpAction.values.add(Entity.Direction.SOUTH);
-			break;
-		case DIRECTION_SOUTHWEST:
-			tmpAction.values.add(Entity.Direction.SOUTHWEST);
-			break;
-		case DIRECTION_WEST:
-			tmpAction.values.add(Entity.Direction.WEST);
-			break;
-		case DIRECTION_NORTHWEST:
-			tmpAction.values.add(Entity.Direction.NORTHWEST);
-			break;
-		}
-		actions.add(tmpAction);
 	}
 	
 	/* Sends packet to this player */
@@ -217,6 +166,7 @@ public class PlayerHandler extends Listener{
 		}
 	}
 	
+	/* Disconnects player from game */
 	public void disconnect(){
 		if(state == PlayerState.IN_GAME && character != null){
 			//Let all near by players know that this player is left game
@@ -226,8 +176,9 @@ public class PlayerHandler extends Listener{
 					continue;
 				}
 				NetProtocol.srEntRemove(((Player) tmpE).getPlayerHandler(),
-											character.getId());
-				((Player) tmpE).getPlayerHandler().removeEntityFromList(character);
+										character.getId());
+				((Player) tmpE).getPlayerHandler()
+										.removeEntityFromInRangeList(character);
 			}
 		}
 		state = PlayerState.DISCONNECTED;
@@ -271,7 +222,6 @@ public class PlayerHandler extends Listener{
 		return client;
 	}
 	
-	
 	public Account getAccount(){
 		return account;
 	}
@@ -289,22 +239,22 @@ public class PlayerHandler extends Listener{
 	}
 	
 	/* Adds entity to list of visible entities*/
-	public void addEntityToList(Entity e){
+	public void addEntityToInRangeList(Entity e){
 		entitiesInRange.add(e);
 	}
 	
 	/* Remove entity from list of visible entities */
-	public void removeEntityFromList(Entity e){
+	public void removeEntityFromInRangeList(Entity e){
 		entitiesInRange.remove(e);
 	}
 	
-	/* Return whether is entity on this player's visible list */
-	public boolean isVisible(Entity e){
+	/* Return whether is entity on this player's range list */
+	public boolean isOnRangeList(Entity e){
 		return entitiesInRange.contains(e);
 	}
 	
-	/* Return referenve to visible entity on this position in list */
-	public Entity getVisibleEntity(int i){
+	/* Return InRange entity on 'i' this position on range list */
+	public Entity getInRangeEntity(int i){
 		return entitiesInRange.get(i);
 	}
 

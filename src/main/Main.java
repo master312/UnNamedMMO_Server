@@ -3,53 +3,44 @@ package main;
 import java.io.IOException;
 
 import com.esotericsoftware.kryonet.Connection;
+import com.esotericsoftware.minlog.Log;
 
 public class Main {
 
 	/* Target logic ticking rate */
-	private static final int TARGET_LOGIC = 30;
-	private long lastFrame = 0;
+	private static final int TARGET_LOGIC = 33;
+	private long lastTick = 0;
 	
 	public Main() throws IOException, InterruptedException{
-		Common.get();	//Initialize common class
-		Common.getGameManagerSt().initialize();
-		Common.getAccountsManagerSt().loadAccounts();
-		Common.getCharactersManagerSt().loadCharacters();
-		Common.getServerSt().startListening();
+		Common.get();								//Initialize common class
+		Common.getGameManagerSt().initialize();		//Initialize game manager
+		Common.getAccountsManagerSt().loadAccounts();//Load accounts
+		Common.getCharactersManagerSt().loadCharacters();//Load characters
+		Common.getServerSt().startListening();		//Open listening socket
 		
-		
-		
-//		Thread t = new Thread(this);
-//		t.start(); //Start logic thread
 		initThreads();
 		
-		startHookingConnections();
+		Log.info("Server ready!");
+		
+		while(true){
+			hookConnections();
+			Common.getCharactersManagerSt().update();
+			threadSleep(5);
+		}	
 	}
 	
-	private void startHookingConnections() 
-			throws InterruptedException, IOException{
-		Connection tmpC = null;
-		while(true){
-			//Common.getServerSt().getSocket().update(0);
-			
-			tmpC = Common.getServerSt().getNewConnection();
-			if(tmpC != null){
-				//We have new connection
-				Common.addPlayerToListSt(new PlayerHandler(tmpC));
-				tmpC = null;
-			}
-			
-			Common.getCharactersManagerSt().update();
-			Common.clearTick(); //Move this from startHookingConnection; Maby new thread?
-			Thread.sleep(25);
+	private void hookConnections(){
+		Connection tmpC = Common.getServerSt().getNewConnection();
+		if(tmpC != null){
+			//We have new connection
+			Common.addPlayerToListSt(new PlayerHandler(tmpC));
 		}
 	}
 	
 	public int getDelta() {
 	    long time = System.currentTimeMillis();
-	    int delta = (int) (time - lastFrame);
-	    lastFrame = time;
- 
+	    int delta = (int) (time - lastTick);
+	    lastTick = time;
 	    return delta;
 	}
 	
@@ -71,33 +62,33 @@ public class Main {
 	}
 	
 	public void threadOne(){
-		//This is game logic thread
+		/* This is game logic thread */
 		getDelta();
 		while(true){
 			int delta = getDelta();
-			
 			if(delta < 1000 / TARGET_LOGIC){
-				try {
-					Thread.sleep((1000 / TARGET_LOGIC) - delta);
-					delta = 1000 / TARGET_LOGIC;
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
+				threadSleep((1000 / TARGET_LOGIC) - delta);
+				delta = getDelta();
 			}
 			Common.getGameManagerSt().update(delta);
 		}
 	}
 	
 	public void threadTwo(){
+		/* This thread updates players visibility lists 
+		 * Clears inactive player objects */
 		while(true){
-			/* This thread updates players visibility lists */
-			Common.getGameManagerSt().listUpdate();
-			
-			try {
-				Thread.sleep(200);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+			Common.clearTick();
+			Common.getGameManagerSt().visibilityUpdate();
+			threadSleep(200);
+		}
+	}
+	
+	private void threadSleep(int ms){
+		try {
+			Thread.sleep(ms);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
 		}
 	}
 	
