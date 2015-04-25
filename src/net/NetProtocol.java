@@ -1,5 +1,6 @@
 package net;
 
+import entities.Entity;
 import entities.Pawn;
 import entities.Player;
 import main.PlayerHandler;
@@ -9,6 +10,12 @@ import main.PlayerHandler.CharacterCreateStatus;
 public class NetProtocol {
 	public enum LoginStatus{
 		LOGIN_OK, LOGIN_FAIL
+	}
+	
+	//TODO: Ne svidja mi se da ovo stoji ovde
+	class EntityUpdates{
+		public static final short POSITION = 1;
+		public static final short DIRECTION = 2;
 	}
 	
 	/* Sends server ready packet to client */
@@ -66,4 +73,34 @@ public class NetProtocol {
 		cl.send(pb.getPacket(), true);
 	}
 	
+	/* Sends whole visible entity list to client */
+	public static void srVisibleEntList(PlayerHandler cl){
+		for(int i = 0; i < cl.getEntitiesInRange().size(); i++){
+			cl.send(cl.getVisibleEntity(i), true);
+		}
+	}
+
+	/* Sends new entity to player */
+	public static void srVisibleEntity(PlayerHandler cl, Entity e){
+		cl.send(e, true);
+	}
+	
+	/* Tells client to remove entity */
+	public static void srEntRemove(PlayerHandler cl, int entityId){
+		PacketBuilder pb = new PacketBuilder();
+		pb.writeShort(OpCodes.SR_ENT_REMOVE);
+		pb.writeInt(entityId);
+		cl.send(pb.getPacket(), true);
+	}
+	
+	/* Sends pawn position update to client */
+	public static void srPawnUpdatePosition(PlayerHandler cl, Pawn pawn){
+		PacketBuilder pb = new PacketBuilder();
+		pb.writeShort(OpCodes.SR_PAWN_UPDATE);
+		pb.writeInt(pawn.getId());
+		pb.writeShort(EntityUpdates.POSITION);
+		pb.writeInt((int)pawn.getLocX());
+		pb.writeInt((int)pawn.getLocY());
+		cl.send(pb.getPacket(), false);
+	}
 }

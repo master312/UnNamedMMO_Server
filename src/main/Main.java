@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import com.esotericsoftware.kryonet.Connection;
 
-public class Main implements Runnable {
+public class Main {
 
 	/* Target logic ticking rate */
 	private static final int TARGET_LOGIC = 30;
@@ -12,14 +12,16 @@ public class Main implements Runnable {
 	
 	public Main() throws IOException, InterruptedException{
 		Common.get();	//Initialize common class
+		Common.getGameManagerSt().initialize();
 		Common.getAccountsManagerSt().loadAccounts();
 		Common.getCharactersManagerSt().loadCharacters();
 		Common.getServerSt().startListening();
 		
 		
-		//If multyple threads are needed, create them here
-		Thread t = new Thread(this);
-		t.start(); //Start logic thread
+		
+//		Thread t = new Thread(this);
+//		t.start(); //Start logic thread
+		initThreads();
 		
 		startHookingConnections();
 	}
@@ -50,13 +52,31 @@ public class Main implements Runnable {
  
 	    return delta;
 	}
-	@Override
-	public void run() {	
+	
+	public void initThreads(){
+		//If multiple threads are needed later, create them here
+		Thread t = new Thread(new Runnable(){
+			public void run(){
+				threadOne();
+			}
+		});
+		t.start();
+		
+		Thread t2 = new Thread(new Runnable(){
+			public void run(){
+				threadTwo();
+			}
+		});
+		t2.start();
+	}
+	
+	public void threadOne(){
+		//This is game logic thread
 		getDelta();
 		while(true){
 			int delta = getDelta();
 			
-			logicTick(delta);
+			Common.getGameManagerSt().update(delta);
 			
 			if(delta < 1000 / TARGET_LOGIC){
 				try {
@@ -69,8 +89,17 @@ public class Main implements Runnable {
 		}
 	}
 	
-	private void logicTick(int deltaTime){
-		Common.getGameManagerSt().update(deltaTime);
+	public void threadTwo(){
+		while(true){
+			/* This thread updates players visibility lists */
+			Common.getGameManagerSt().listUpdate();
+			
+			try {
+				Thread.sleep(200);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 	
 	public static void main(String[] args) 
@@ -78,17 +107,3 @@ public class Main implements Runnable {
 		new Main();
 	}
 }
-
-//class TmpListener extends Listener{
-//	
-//	public TmpListener(){
-//	}
-//	public void received(Connection c, Object p){
-//		if(p instanceof Packet){
-//			Packet tmpP = (Packet)p;
-//			if(tmpP.readInt() == 666){
-//				System.out.println(c.getID() + " Moved: " + tmpP.readInt() + " " + tmpP.readInt());
-//			}
-//		}
-//	}
-//}

@@ -104,6 +104,8 @@ public class Entity {
 		this.spriteId = spriteId;
 	}
 	
-	
+	public boolean equals(Object o){
+		return id == ((Entity) o).getId();
+	}
 	
 }

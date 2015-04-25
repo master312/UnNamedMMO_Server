@@ -16,18 +16,15 @@ public class OpCodes {
 	/* Number of characters on account
 	 * SR_CHAR_COUNT (short)num */
 	public static final short SR_CHAR_COUNT = 0x0003;
-	/* Sends player entity class to client 
-	 * Used for sending player character to him
-	 * SR_CHARACTER (Player)player*/
-	public static final short SR_ENT_CHARACTER = 0x0004;
-	/* Sends pawn entity class to client 
-	 * Used for sending every other pawn entity, including characters
-	 * that this player dose not own 
-	 * SR_PAWN (Pawn)pawn*/
-	public static final short SR_ENT_PAWN = 0x0005;
 	/* Character creation status 
 	 * SR_CHAR_CREATE_STATUS (short)statusId 1=OK, 2=Fail...*/
-	public static final short SR_CHAR_CREATE_STATUS = 0x0006;
+	public static final short SR_CHAR_CREATE_STATUS = 0x0004;
+	/* Update pawn stat 
+	 * SR_PAWN_UPDATE (int)entityId (short)statId (...)stat */
+	public static final short SR_PAWN_UPDATE = 0x0005;
+	/* Remove entity from player sight 
+	 * SP_ENT_REMOVE (int)entetyId*/
+	public static final short SR_ENT_REMOVE = 0x0006;
 	
 	/* ********************* Client to server OpCodes ************************/
 	
@@ -40,4 +37,9 @@ public class OpCodes {
 	/* Lets server know that client has moved 
 	 * CL_MOVE (short)Dir 0=up;2=right;4=down;6=left*/
 	public static final short CL_MOVE = 0x0003;
+	/* Request pawn info 
+	 * Example: Used when reveice SR_PAWN_UPDATE, but no pawn with that id
+	 * is on entities list 
+	 * CL_REQUEST_PAWN (int)pawnId*/
+	public static final short CL_REQUEST_PAWN = 0x0004;
 }

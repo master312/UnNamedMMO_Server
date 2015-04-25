@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
 
+import entities.Entity;
 import main.PlayerHandler.PlayerState;
 import net.ServerSocket;
 
@@ -25,6 +26,8 @@ public class Common {
 	public static final int CONNECTION_TIMEOUT = 5000;
 	/* Maximum number of character pre account */
 	public static final int MAXIMUM_ACC_CHAR_NUMBER = 5;
+	/* View distance in pixels */
+	public static final int ENTITY_VIEW_DISTANCE = 4000;
 	
 	private ServerSocket serverSocket = null;
 	private AccountsManager accountManager = null;
@@ -43,8 +46,8 @@ public class Common {
 		serverSocket = new ServerSocket(LISTEN_PORT_TCP, 
 				LISTEN_PORT_UDP, MAXIMUM_CONNECTED);
 		accountManager = new AccountsManager();
-		gameManager = new GameManager();
 		charactersManager = new CharactersManager();
+		gameManager = new GameManager();
 	}
 	
 	public ServerSocket getServer(){
@@ -129,6 +132,15 @@ public class Common {
 	
 	public static void removePlayerSt(PlayerHandler player){
 		commonClass.removePlayer(player);
+	}
+	
+	/* Returns whether those two entities are visible to each other */
+	public static boolean isInRange(Entity e1, Entity e2){
+		return (int)Math.sqrt((e1.getLocX() - e2.getLocX()) * 
+							(e1.getLocX() - e2.getLocX()) + 
+							(e1.getLocY() - e2.getLocY()) *
+							(e1.getLocY() - e2.getLocY())) 
+							< ENTITY_VIEW_DISTANCE;
 	}
 	
 	/* Called on interval. This funciton clear all inactive player objects */
