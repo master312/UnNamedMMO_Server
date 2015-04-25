@@ -1,7 +1,5 @@
 package main;
 
-import java.util.List;
-
 import net.NetProtocol;
 import entities.Entity;
 import entities.Entity.Direction;
@@ -11,7 +9,7 @@ import main.PlayerHandler.PlayerAction;
 public class PlayerActionHandler {
 	/* Maximum player actions pre tick
 	 * All actions above this number will be droped */
-	private static final int MAXIMUM_ACTIONS = 10;
+	private static final int MAXIMUM_ACTIONS = 6;
 	private static int delta = 0;
 	
 	public static void handlePlayerActions(PlayerHandler pl, int _delta){
@@ -69,9 +67,8 @@ public class PlayerActionHandler {
 			break;
 		}
 		NetProtocol.srPawnUpdatePosition(pl, entity);
-		List<Entity> tmpList = pl.getEntitiesInRange();
-		for(int i = 0; i < tmpList.size(); i++){
-			Entity tmpEntity = tmpList.get(i);
+		for(int i = 0; i < pl.getEntitiesInRange().size(); i++){
+			Entity tmpEntity = pl.getEntitiesInRange().get(i);
 			if(!tmpEntity.isPlayer()){
 				continue;
 			}

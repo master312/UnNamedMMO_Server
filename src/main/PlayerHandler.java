@@ -208,6 +208,8 @@ public class PlayerHandler extends Listener{
 	
 	/* Sends packet to this player */
 	public void send(Object pack, boolean isReliable){
+		if(client == null)
+			return;
 		if(isReliable){
 			client.sendTCP(pack);
 		}else{
@@ -216,8 +218,24 @@ public class PlayerHandler extends Listener{
 	}
 	
 	public void disconnect(){
+		if(state == PlayerState.IN_GAME && character != null){
+			//Let all near by players know that this player is left game
+			for(int i = 0; i < entitiesInRange.size(); i++){
+				Entity tmpE = entitiesInRange.get(i);
+				if(!tmpE.isPlayer()){
+					continue;
+				}
+				NetProtocol.srEntRemove(((Player) tmpE).getPlayerHandler(),
+											character.getId());
+				((Player) tmpE).getPlayerHandler().removeEntityFromList(character);
+			}
+		}
 		state = PlayerState.DISCONNECTED;
 		disconnectTime = System.currentTimeMillis();
+		entitiesInRange = null;
+		actions = null;
+		client.close();
+		client = null;
 	}	
 	
 	public long getDisconnectTime() {
@@ -233,12 +251,20 @@ public class PlayerHandler extends Listener{
 	}
 	
 	public int getConnectionId(){
+		if(client == null)
+			return -1;
 		return client.getID();
 	}
-
+	
 	/* Return connection(session) id */
 	public int getSession(){
-		return client.getID();
+		return getConnectionId();
+	}
+	
+	public boolean isConnected(){
+		if(client == null)
+			return false;
+		return client.isConnected();
 	}
 	
 	public Connection getConnection(){

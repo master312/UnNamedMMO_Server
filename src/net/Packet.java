@@ -3,10 +3,12 @@ package net;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 
+import com.esotericsoftware.kryo.serializers.FieldSerializer.Optional;
 import com.esotericsoftware.minlog.Log;
 
 public class Packet {
 	/* Maximum packet size in bytes */
+	@Optional(value = "")
 	private static short readPos = 0;
 	
 	public byte data[];
@@ -83,5 +85,11 @@ public class Packet {
 	
 	private boolean safeCheck(short start, short end){
 		return start < data.length && end <= data.length;
+	}
+	
+	/* This should be called when done using packet  */
+	public void clear(){
+		data = null;
+		readPos = 0;
 	}
 }

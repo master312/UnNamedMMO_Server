@@ -149,11 +149,17 @@ public class Common {
 			return;
 		}
 		lastClear = System.currentTimeMillis();
-		clearTickPreGame();
-		clearTickInGame();
+		boolean tmpB = false;
+		tmpB = clearTickPreGame();
+		tmpB = tmpB | clearTickInGame();
+		if(tmpB){
+			System.gc();
+		}
 	}
 	
-	private static void clearTickPreGame(){
+	/* Return true if some player was deleted */
+	private static boolean clearTickPreGame(){
+		boolean toReturn = false;
 		for(int i = 0; i < getPreGamePlayersSt().size(); i++){
 			PlayerHandler tmpP = getPreGamePlayersSt().get(i);
 			if(tmpP.getState() == PlayerState.DISCONNECTED){
@@ -161,22 +167,29 @@ public class Common {
 					if(tmpP.getConnection() != null)
 						tmpP.getConnection().close();
 					removePlayerSt(tmpP);
+					toReturn = true;
 				}
 			}
 		}
+		return toReturn;
 	}
 
-	private static void clearTickInGame(){
+	/* Return true if some player was deleted */
+	private static boolean clearTickInGame(){
+		boolean toReturn = false;
 		for(int i = 0; i < getInGamePlayersSt().size(); i++){
 			PlayerHandler tmpP = getInGamePlayersSt().get(i);
 			if(tmpP.getState() == PlayerState.DISCONNECTED){
 				if(lastClear - tmpP.getDisconnectTime() > PLAYER_OBJECT_TIMEOUT){
 					if(tmpP.getConnection() != null)
 						tmpP.getConnection().close();
+					tmpP.getCharacter().setPlayerHandler(null);
 					removePlayerSt(tmpP);
+					toReturn = true;
 				}
 			}
 		}
+		return toReturn;
 	}
 	
 	public static Common get(){

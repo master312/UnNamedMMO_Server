@@ -47,7 +47,11 @@ public class PacketBuilder {
 			System.arraycopy(tmpB, 0, tmp.data, tmpLen, tmpB.length);
 			tmpLen += tmpB.length;
 		}
-		
+
 		return tmp;
+	}
+	
+	public int getSize(){
+		return size;
 	}
 }

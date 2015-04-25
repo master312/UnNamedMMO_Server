@@ -76,16 +76,15 @@ public class Main {
 		while(true){
 			int delta = getDelta();
 			
-			Common.getGameManagerSt().update(delta);
-			
 			if(delta < 1000 / TARGET_LOGIC){
 				try {
 					Thread.sleep((1000 / TARGET_LOGIC) - delta);
+					delta = 1000 / TARGET_LOGIC;
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
+			Common.getGameManagerSt().update(delta);
 		}
 	}
 	

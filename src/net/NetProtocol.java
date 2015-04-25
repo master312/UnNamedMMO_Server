@@ -22,7 +22,9 @@ public class NetProtocol {
 	public static void srLoginReady(PlayerHandler cl){
 		PacketBuilder pb = new PacketBuilder();
 		pb.writeShort(OpCodes.SR_LOGIN_READY);
-		cl.send(pb.getPacket(), true);
+		Packet pack = pb.getPacket();
+		cl.send(pack, false);
+		pack.clear();
 	}
 	
 	/* Sends login status to client */
@@ -34,14 +36,18 @@ public class NetProtocol {
 		}else{
 			pb.writeShort((short)2);
 		}
-		cl.send(pb.getPacket(), true);
+		Packet pack = pb.getPacket();
+		cl.send(pack, false);
+		pack.clear();
 	}
 	
 	public static void srCharCount(PlayerHandler cl, short count){
 		PacketBuilder pb = new PacketBuilder();
 		pb.writeShort(OpCodes.SR_CHAR_COUNT);
 		pb.writeShort(count);
-		cl.send(pb.getPacket(), true);
+		Packet pack = pb.getPacket();
+		cl.send(pack, false);
+		pack.clear();
 	}
 	
 	/* Sends 'player entity' to client */
@@ -70,7 +76,9 @@ public class NetProtocol {
 			pb.writeShort((short)3);
 			break;
 		}
-		cl.send(pb.getPacket(), true);
+		Packet pack = pb.getPacket();
+		cl.send(pack, false);
+		pack.clear();
 	}
 	
 	/* Sends whole visible entity list to client */
@@ -90,7 +98,9 @@ public class NetProtocol {
 		PacketBuilder pb = new PacketBuilder();
 		pb.writeShort(OpCodes.SR_ENT_REMOVE);
 		pb.writeInt(entityId);
-		cl.send(pb.getPacket(), true);
+		Packet pack = pb.getPacket();
+		cl.send(pack, false);
+		pack.clear();
 	}
 	
 	/* Sends pawn position update to client */
@@ -101,6 +111,8 @@ public class NetProtocol {
 		pb.writeShort(EntityUpdates.POSITION);
 		pb.writeInt((int)pawn.getLocX());
 		pb.writeInt((int)pawn.getLocY());
-		cl.send(pb.getPacket(), false);
+		Packet pack = pb.getPacket();
+		cl.send(pack, false);
+		pack.clear();
 	}
 }

@@ -19,12 +19,16 @@ public class GameManager {
 	public void update(int _delta){
 		delta = _delta;
 		for(int i = 0; i < players.size(); i++){
+			if(!players.get(i).isConnected())
+				continue;
 			handlePlayer(players.get(i));
 		}
 	}
 	
 	public void listUpdate(){
 		for(int i = 0; i < players.size(); i++){
+			if(!players.get(i).isConnected())
+				continue;
 			updateVisibilityList(players.get(i));
 		}
 	}
@@ -36,7 +40,8 @@ public class GameManager {
 	private void updateVisibilityList(PlayerHandler pl){
 		for(int i = 0; i < players.size(); i++){
 			PlayerHandler tmpPlayer = players.get(i);
-			if(tmpPlayer.getSession() == pl.getSession()) 
+			if(tmpPlayer.getSession() == pl.getSession() || 
+					!tmpPlayer.isConnected()) 
 				continue;	//We don't want to sent player to him self
 			/* Is this current visible to player we are making list for*/
 			boolean isVisible = pl.isVisible(tmpPlayer.getCharacter());
