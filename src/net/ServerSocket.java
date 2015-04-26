@@ -3,6 +3,8 @@ package net;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import map.MapChunk;
+
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.kryonet.Server;
@@ -44,6 +46,8 @@ public class ServerSocket extends Listener{
 		server.getKryo().register(Player.class);
 		server.getKryo().register(entities.Entity.EntityType.class);
 		server.getKryo().register(entities.Entity.Direction.class);
+		server.getKryo().register(MapChunk.class);
+		server.getKryo().register(MapChunk.Layer.class);
 		
 		server.bind(tcpPort, udpPort);
 		server.start();

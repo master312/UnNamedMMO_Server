@@ -80,7 +80,7 @@ public class Main {
 		while(true){
 			Common.clearTick();
 			Common.getGameManagerSt().visibilityUpdate();
-			threadSleep(200);
+			threadSleep(200);	//This thread ticks 5 times pre secound
 		}
 	}
 	

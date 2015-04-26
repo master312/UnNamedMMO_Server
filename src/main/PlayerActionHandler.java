@@ -1,5 +1,8 @@
 package main;
 
+import java.awt.Point;
+
+import map.MapManager;
 import net.NetProtocol;
 import entities.Entity;
 import entities.Entity.Direction;
@@ -41,6 +44,9 @@ public class PlayerActionHandler {
 	/* Handle movement action */
 	private static void handlePlayerMovement(PlayerHandler pl, Direction dir){
 		Player entity = pl.getCharacter();
+		MapManager tmpM = Common.getMapManagerSt();
+		Point oldChunk = tmpM.pixelToChunk((int)entity.getLocX(),
+											(int)entity.getLocY());
 		float speed = ((float)entity.getCurrentSpeed() / 100) * delta;
 		switch(dir){
 		case NORTH:
@@ -70,6 +76,14 @@ public class PlayerActionHandler {
 		}
 		//Send new position back to player
 		NetProtocol.srPawnUpdatePosition(pl, entity);
+		
+		//Checking if player has moved to new chunk
+		Point newChunk = tmpM.pixelToChunk((int)entity.getLocX(), 
+											(int)entity.getLocY());
+		if(newChunk.x != oldChunk.x || newChunk.y != oldChunk.y){
+			//Player moved to new chunk
+			pl.calcNeededChunks();
+		}
 		
 		//And to all players around him
 		for(int i = 0; i < pl.getEntitiesInRange().size(); i++){

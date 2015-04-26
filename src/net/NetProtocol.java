@@ -5,6 +5,7 @@ import entities.Pawn;
 import entities.Player;
 import main.PlayerHandler;
 import main.PlayerHandler.CharacterCreateStatus;
+import map.MapChunk;
 
 /* This class package network packets */
 public class NetProtocol {
@@ -114,5 +115,10 @@ public class NetProtocol {
 		Packet pack = pb.getPacket();
 		cl.send(pack, false);
 		pack.clear();
+	}
+	
+	/* Sends map chunk to player */
+	public static void srMapChunk(PlayerHandler cl, MapChunk mc){
+		cl.send(mc, true);
 	}
 }

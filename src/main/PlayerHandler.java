@@ -1,11 +1,13 @@
 package main;
 
+import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import main.AccountsManager.Account;
 import main.CharactersManager.AccountCharacters;
+import map.MapManager;
 import net.NetProtocol;
 import net.OpCodes;
 import net.Packet;
@@ -21,7 +23,7 @@ import entities.Player;
  * and handles packet sending/receiving 
  * Client object, packets objects .... 
  * WARNING: This class object is added to 'preGamePlayers' list in common
- * on its creatino. Dont forget to delete it*/
+ * on its creation. Don't forget to delete it */
 public class PlayerHandler extends Listener{
 	public enum PlayerState{
 		CONNECTED, LOGGED_IN, CHARACTER_SCREEN, IN_GAME, DISCONNECTED
@@ -29,6 +31,28 @@ public class PlayerHandler extends Listener{
 	
 	public enum CharacterCreateStatus{
 		OK, INVALID_NAME, NOT_ALLOWED
+	}
+	
+	/* Map chunk that player needs to have */
+	public class NeedMapChunk{
+		/* Has this chunk been send to player */
+		public boolean isSend;
+		/* Locations of chunk, on megamap (in chunks) */
+		public int x, y;
+		
+		public NeedMapChunk(){
+			x = y = 0;
+			isSend = false;
+		}
+		
+		public NeedMapChunk(int _x, int _y){
+			x = _x;
+			y = _y;
+		}
+		
+		public boolean equals(Object o){
+			return x == ((NeedMapChunk)o).x && y == ((NeedMapChunk)o).y;
+		}
 	}
 	
 	/* Player network client object */
@@ -47,6 +71,12 @@ public class PlayerHandler extends Listener{
 	/* List of action requested by player, waiting to be executed */
 	private List<PlayerAction> actions = 
 			Collections.synchronizedList(new ArrayList<PlayerAction>());
+	/* List of map chunk positions this player needs */
+	private List<NeedMapChunk> neededChunks = 
+			Collections.synchronizedList(new ArrayList<NeedMapChunk>());
+	/* Whether new map chunks are needed to be send to player */
+	private boolean newMapChunks = false;
+	
 	
 	public PlayerHandler(Connection cl){
 		client = cl;
@@ -189,6 +219,62 @@ public class PlayerHandler extends Listener{
 		client = null;
 	}	
 	
+	/* Calculate list of needed map chunks for this player 
+	 * This function should only be called if player has moved to new chunk.
+	 * ...that needs to be manualy checked */
+	public void calcNeededChunks(){
+		/* TODO: Ova funkcija moze MNOGO da se optimizira, tako sto nemoj koristiti
+		 *  List<NeedMapChunk>, bespotrebno je. Nego napravi 2dArray neededChunks[3][3]*/
+		
+		MapManager tmpM = Common.getMapManagerSt();
+		Point start = tmpM.pixelToChunk((int)character.getLocX(), 
+										(int)character.getLocY());
+		Point end = new Point(start);
+		start.x -= 1;
+		start.y -= 1;
+		end.x += 1;
+		end.y += 1;
+		
+		int worldWidth = tmpM.getWorldWidth();
+		int worldHeight = tmpM.getWorldHeight();
+		
+		if(start.x < 0)
+			start.x = 0;
+		if(start.y < 0)
+			start.y = 0;
+		if(end.x >= worldWidth)
+			end.x = worldWidth - 1;
+		if(end.y >= worldHeight)
+			end.y = worldHeight - 1;
+		if(start.x >= end.x)
+			start.x = end.x - 2;
+		if(start.y >= end.y)
+			start.y = end.y - 2;
+		
+		List<NeedMapChunk> tmpList = new ArrayList<NeedMapChunk>();
+		
+		for(int i = start.x; i <= end.x; i++){
+			for(int j = start.y; j <= end.y; j++){
+				NeedMapChunk tmpChunk = new NeedMapChunk(i, j);
+				tmpList.add(tmpChunk);
+			}
+		}
+		
+		for(int i = 0; i < neededChunks.size(); i++){
+			int index = tmpList.indexOf(neededChunks.get(i));
+			if(index == -1){
+				continue;
+			}
+			if(neededChunks.get(i).equals(tmpList.get(index))){
+				if(neededChunks.get(i).isSend){
+					tmpList.get(index).isSend = true;
+				}
+			}
+		}
+		newMapChunks = true;
+		neededChunks = tmpList;
+	}
+	
 	public long getDisconnectTime() {
 		return disconnectTime;
 	}
@@ -277,6 +363,47 @@ public class PlayerHandler extends Listener{
 	
 	public void clearActions(){
 		actions.clear();
+	}
+	
+	public List<NeedMapChunk> getNeedChunks() {
+		return neededChunks;
+	}
+
+	/* Add new chunk to neededChunks */
+	public void addNeededChunk(int x, int y){
+		neededChunks.add(new NeedMapChunk(x, y));
+	}
+	
+	/* Return NeedMapChunk object 
+	 * Returns null if not found */
+	public NeedMapChunk getNeededChunk(int x, int y){
+		for(int i = 0; i < neededChunks.size(); i++){
+			NeedMapChunk tmpChunk = neededChunks.get(i);
+			if(tmpChunk.x == x && tmpChunk.y == y){
+				return tmpChunk;
+			}
+		}
+		return null;
+	}
+	
+	/* Removes this chunk from needed chunks list */
+	public void removeNeededChunk(int x, int y){
+		for(int i = 0; i < neededChunks.size(); i++){
+			NeedMapChunk tmpChunk = neededChunks.get(i);
+			if(tmpChunk.x == x && tmpChunk.y == y){
+				neededChunks.remove(i);
+				return;
+			}
+		}
+	}
+	
+	/* Returns whether new map chunks needs to be send to player */
+	public boolean isNewMapChunks(){
+		return newMapChunks;
+	}
+	
+	public void setNewMapChunks(boolean b){
+		newMapChunks = b;
 	}
 	
 	public boolean equals(Object obj){

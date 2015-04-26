@@ -6,6 +6,7 @@ import java.util.Collections;
 
 import entities.Entity;
 import main.PlayerHandler.PlayerState;
+import map.MapManager;
 import net.ServerSocket;
 
 /* This class contains EVERYTHINH AHAHAHAHA !!! >:} */
@@ -33,6 +34,7 @@ public class Common {
 	private AccountsManager accountManager = null;
 	private GameManager gameManager = null;
 	private CharactersManager charactersManager = null;
+	private MapManager mapManager = null;
 	
 	/* List players that not logged in, or on character selection screen */
 	private List<PlayerHandler> preGamePlayers =
@@ -49,6 +51,9 @@ public class Common {
 		accountManager = new AccountsManager();
 		charactersManager = new CharactersManager();
 		gameManager = new GameManager();
+		mapManager = new MapManager();
+		
+		mapManager.initWorld();	//This will not be here. Its here just for testing
 	}
 	
 	public ServerSocket getServer(){
@@ -81,6 +86,14 @@ public class Common {
 
 	public static CharactersManager getCharactersManagerSt(){
 		return commonClass.getCharactersManager();
+	}
+	
+	public MapManager getMapManager(){
+		return mapManager;
+	}
+	
+	public static MapManager getMapManagerSt(){
+		return commonClass.getMapManager();
 	}
 	
 	/* Returns array list of players that are not yet in game

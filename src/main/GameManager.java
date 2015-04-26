@@ -30,9 +30,15 @@ public class GameManager {
 	/* Update visibility lists */
 	public void visibilityUpdate(){
 		for(int i = 0; i < players.size(); i++){
-			if(!players.get(i).isConnected())
+			PlayerHandler tmpPl = players.get(i);
+			if(!tmpPl.isConnected())
 				continue;
-			updateVisibilityList(players.get(i));
+			updateVisibilityList(tmpPl);
+			if(tmpPl.isNewMapChunks()){
+				//Sending new map chunks to player
+				Common.getMapManagerSt().sendChunks(tmpPl);
+				tmpPl.setNewMapChunks(false);
+			}
 		}
 	}
 	
