@@ -1,7 +1,5 @@
 package net;
 
-import java.io.ByteArrayOutputStream;
-
 import entities.Entity;
 import entities.Pawn;
 import entities.Player;
