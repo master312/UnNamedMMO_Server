@@ -12,11 +12,11 @@ public class Main {
 	private long lastTick = 0;
 	
 	public Main() throws IOException, InterruptedException{
-		Common.get();								//Initialize common class
+		Common.get();	//Initialize common class
 		Common.getGameManagerSt().initialize();		//Initialize game manager
-		Common.getAccountsManagerSt().loadAccounts();//Load accounts
+		Common.getAccountsManagerSt().loadAccounts();	//Load accounts
 		Common.getCharactersManagerSt().loadCharacters();//Load characters
-		Common.getServerSt().startListening();		//Open listening socket
+		Common.getServerSt().startListening();			//Open listening socket
 		
 		initThreads();
 		

@@ -75,7 +75,6 @@ public class PlayerHandler extends Listener{
 	/* List of map chunk positions this player needs */
 	private List<NeedMapChunk> neededChunks = 
 			Collections.synchronizedList(new ArrayList<NeedMapChunk>());
-	//private NeedMapChunk neededChunks[][] = new NeedMapChunk[3][3];
 	/* Whether new map chunks are needed to be send to player */
 	private boolean newMapChunks = false;
 	
@@ -86,10 +85,6 @@ public class PlayerHandler extends Listener{
 		client.addListener(this);
 		client.setKeepAliveTCP(Common.CONNECTION_TIMEOUT / 2);
 		state = PlayerState.CONNECTED;
-		
-//		for(int i = 0; i < 3; i++)
-//			for(int j = 0; j < 3; j++)
-//				neededChunks[i][j] = null;
 		
 		NetProtocol.srLoginReady(this);	//Sends ready signal to client
 	}
@@ -231,15 +226,13 @@ public class PlayerHandler extends Listener{
 										.removeEntityFromInRangeList(character);
 			}
 		}
-//		for(int i = 0; i < 3; i++){
-//			for(int j = 0; j < 3; j++){
-//				NeedMapChunk tmpC = neededChunks[i][j];
-//				if(tmpC != null){ 
-//					Common.getMapManagerSt()
-//							.rempvePlayerFromChunk(tmpC.x, tmpC.y);
-//				}
-//			}
-//		}
+		for(int i = 0; i < neededChunks.size(); i++){
+			NeedMapChunk tmpC = neededChunks.get(i);
+			if(tmpC != null){ 
+				Common.getMapManagerSt()
+						.rempvePlayerFromChunk(tmpC.x, tmpC.y);
+			}
+		}
 		state = PlayerState.DISCONNECTED;
 		disconnectTime = System.currentTimeMillis();
 		entitiesInRange = null;
