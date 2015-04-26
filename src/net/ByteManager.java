@@ -3,7 +3,7 @@ package net;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-class ByteManager{
+public class ByteManager{
 	public static byte[] shortToByte(short value){
 		return ByteBuffer.allocate(2)
 				.order(ByteOrder.BIG_ENDIAN)

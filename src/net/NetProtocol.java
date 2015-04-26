@@ -1,5 +1,7 @@
 package net;
 
+import java.io.ByteArrayOutputStream;
+
 import entities.Entity;
 import entities.Pawn;
 import entities.Player;
@@ -119,6 +121,7 @@ public class NetProtocol {
 	
 	/* Sends map chunk to player */
 	public static void srMapChunk(PlayerHandler cl, MapChunk mc){
+		System.out.println("Sending chunk!");
 		cl.send(mc, true);
 	}
 }

@@ -33,7 +33,7 @@ public class ServerSocket extends Listener{
 		tcpPort = _tcpPort;
 		udpPort = _udpPort;
 		maxConnections = _maxConnected;
-		server = new Server();
+		server = new Server(301001, 301001);
 	}
 	
 	/* Start listening for clients */
@@ -46,8 +46,13 @@ public class ServerSocket extends Listener{
 		server.getKryo().register(Player.class);
 		server.getKryo().register(entities.Entity.EntityType.class);
 		server.getKryo().register(entities.Entity.Direction.class);
+		
 		server.getKryo().register(MapChunk.class);
 		server.getKryo().register(MapChunk.Layer.class);
+		server.getKryo().register(MapChunk.Tile.class);
+		server.getKryo().register(MapChunk.Tile[].class);
+		server.getKryo().register(MapChunk.Tile[][].class);
+		server.getKryo().register(short[].class);
 		
 		server.bind(tcpPort, udpPort);
 		server.start();

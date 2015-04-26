@@ -1,5 +1,9 @@
 package map;
 
+import java.awt.HeadlessException;
+
+import net.ByteManager;
+
 import com.esotericsoftware.kryo.serializers.FieldSerializer.Optional;
 
 public class MapChunk {
@@ -16,7 +20,7 @@ public class MapChunk {
 	 * (Layers that are drawn over player) */
 	private static final int TOP_LAYERS = 2;
 	
-	private class Tile{
+	public class Tile{
 		private short ground = -1;
 		private short bottomTile[];
 		private short topTile[];
@@ -57,6 +61,7 @@ public class MapChunk {
 	private int width = 0;
 	@Optional(value = "")	//Tells network serializer to ignore this variable
 	private int height = 0;
+	
 	private int tilesetId = 0;
 	private Tile tiles[][] = null;
 	/* Location on megamap */
@@ -104,7 +109,46 @@ public class MapChunk {
 	public void setLocY(int locY) {
 		this.locY = locY;
 	}
+	
+	/* Convert this map to array of bytes */
+//	public byte[] getByteData(){
+//		byte tmp[] = new byte[ ((BOTTOM_LAYERS + TOP_LAYERS + 1) 
+//		                     * (width * height) * 2)
+//		                     + 4 + 4 + 4 ];
+//		byte tmp4[];
+//		tmp4 = ByteManager.intToByte(tilesetId);
+//		tmp[0] = tmp4[0]; tmp[1] = tmp4[1]; tmp[2] = tmp4[2]; tmp[3] = tmp4[3];
+//		tmp4 = ByteManager.intToByte(locX);
+//		tmp[4] = tmp4[0]; tmp[5] = tmp4[1]; tmp[6] = tmp4[2]; tmp[7] = tmp4[3];
+//		tmp4 = ByteManager.intToByte(locY);
+//		tmp[8] = tmp4[0]; tmp[9] = tmp4[1]; tmp[10] = tmp4[2]; tmp[11] = tmp4[3];
+//		
+//		byte tmp2[] = new byte[2];
+//		for(int i = 0; i < width; i++){
+//			for(int j = 0; j < height; j++){
+//				
+//			}
+//		}
+//		return tmp;
+//	}
 
+//	private byte[] tileToByte(Tile t){
+//		byte tmp[] = new byte[(BOTTOM_LAYERS + TOP_LAYERS + 1) * 2];
+//		byte tmp2[];
+//		
+//		tmp2 = ByteManager.shortToByte(t.getGround());
+//		int tmpPointer = 0;
+//		tmp[0] = tmp2[0]; tmp[1] = tmp2[1];
+//		tmpPointer = 2;
+//		for(int i = 0; i < BOTTOM_LAYERS; i++){
+//			tmp2 = ByteManager.shortToByte(t.getBottom(i));
+//			
+//		}
+//		for(int i = 0; i < TOP_LAYERS; i++){
+//			t.getTop(i);
+//		}
+//	}
+	
 	public int getWidth() { return width; }
 	public int getHeight() { return height; }
 	public int getTilesetId() { return tilesetId; }

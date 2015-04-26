@@ -148,6 +148,7 @@ public class PlayerHandler extends Listener{
 				state = PlayerState.IN_GAME;
 				Common.addPlayerToListSt(this); //Add player to inGame list
 				character.setPlayerHandler(this);
+				calcNeededChunks();
 			}
 			break;
 		}
