@@ -25,6 +25,9 @@ public class OpCodes {
 	/* Remove entity from player sight 
 	 * SP_ENT_REMOVE (int)entetyId*/
 	public static final short SR_ENT_REMOVE = 0x0006;
+	/* Sends world size(in chunks) to client 
+	 * SR_WORLD_SIZE (int)worldWidth (int)worldHeight (int)chunkWidht (int)cHeight*/
+	public static final short SR_WORLD_SIZE = 0x0007;
 	
 	/* ********************* Client to server OpCodes ************************/
 	
@@ -38,8 +41,11 @@ public class OpCodes {
 	 * CL_MOVE (short)Dir 0=up;2=right;4=down;6=left*/
 	public static final short CL_MOVE = 0x0003;
 	/* Request pawn info 
-	 * Example: Used when reveice SR_PAWN_UPDATE, but no pawn with that id
-	 * is on entities list 
+	 * Example: Used when receive SR_PAWN_UPDATE, but no pawn with that id
+	 * is on client's entities list 
 	 * CL_REQUEST_PAWN (int)pawnId*/
 	public static final short CL_REQUEST_PAWN = 0x0004;
+	/* Request map chunk 
+	 * CL_REQUEST_MAP (int)chunkX (int)chunkY */
+	public static final short CL_REQUEST_MAP = 0x0005;
 }

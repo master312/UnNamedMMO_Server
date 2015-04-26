@@ -1,9 +1,5 @@
 package map;
 
-import java.awt.HeadlessException;
-
-import net.ByteManager;
-
 import com.esotericsoftware.kryo.serializers.FieldSerializer.Optional;
 
 public class MapChunk {
@@ -22,7 +18,6 @@ public class MapChunk {
 	
 	//@Optional(value = "")	//Tells network serializer to ignore this variable
 	private int width = 0;
-	//@Optional(value = "")	//Tells network serializer to ignore this variable
 	private int height = 0;
 	
 	private int tilesetId = 0;
@@ -30,6 +25,13 @@ public class MapChunk {
 	/* Location on megamap */
 	private int locX = 0;
 	private int locY = 0;
+	
+	/* Number of players on this map */
+	@Optional(value = "")	//Tells network serializer to ignore this variable
+	private int playersNum = 0;
+	/* Time when this chunk started to timeout */
+	@Optional(value = "")
+	private long timeoutStart = 0;
 	
 	public MapChunk() { }
 	
@@ -57,60 +59,24 @@ public class MapChunk {
 	public void fillLayer(int tile, Layer layer, int layerNumber){		
 	}
 	
-	public int getLocX() {
-		return locX;
+	public void addPlayer() { 
+		playersNum ++; 
+		timeoutStart = 0;
 	}
-
-	public void setLocX(int locX) {
-		this.locX = locX;
-	}
-
-	public int getLocY() {
-		return locY;
-	}
-
-	public void setLocY(int locY) {
-		this.locY = locY;
+	public void removePlayer(){
+		playersNum --;
+		if(playersNum <= 0){
+			playersNum = 0;
+			timeoutStart = System.currentTimeMillis();
+		}
 	}
 	
-	/* Convert this map to array of bytes */
-//	public byte[] getByteData(){
-//		byte tmp[] = new byte[ ((BOTTOM_LAYERS + TOP_LAYERS + 1) 
-//		                     * (width * height) * 2)
-//		                     + 4 + 4 + 4 ];
-//		byte tmp4[];
-//		tmp4 = ByteManager.intToByte(tilesetId);
-//		tmp[0] = tmp4[0]; tmp[1] = tmp4[1]; tmp[2] = tmp4[2]; tmp[3] = tmp4[3];
-//		tmp4 = ByteManager.intToByte(locX);
-//		tmp[4] = tmp4[0]; tmp[5] = tmp4[1]; tmp[6] = tmp4[2]; tmp[7] = tmp4[3];
-//		tmp4 = ByteManager.intToByte(locY);
-//		tmp[8] = tmp4[0]; tmp[9] = tmp4[1]; tmp[10] = tmp4[2]; tmp[11] = tmp4[3];
-//		
-//		byte tmp2[] = new byte[2];
-//		for(int i = 0; i < width; i++){
-//			for(int j = 0; j < height; j++){
-//				
-//			}
-//		}
-//		return tmp;
-//	}
-
-//	private byte[] tileToByte(Tile t){
-//		byte tmp[] = new byte[(BOTTOM_LAYERS + TOP_LAYERS + 1) * 2];
-//		byte tmp2[];
-//		
-//		tmp2 = ByteManager.shortToByte(t.getGround());
-//		int tmpPointer = 0;
-//		tmp[0] = tmp2[0]; tmp[1] = tmp2[1];
-//		tmpPointer = 2;
-//		for(int i = 0; i < BOTTOM_LAYERS; i++){
-//			tmp2 = ByteManager.shortToByte(t.getBottom(i));
-//			
-//		}
-//		for(int i = 0; i < TOP_LAYERS; i++){
-//			t.getTop(i);
-//		}
-//	}
+	public long getTimeout() { return timeoutStart; }
+	
+	public int getLocX() { return locX;}
+	public void setLocX(int locX) { this.locX = locX;}
+	public int getLocY() { return locY; }
+	public void setLocY(int locY) { this.locY = locY; }
 	
 	public int getWidth() { return width; }
 	public int getHeight() { return height; }

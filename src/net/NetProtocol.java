@@ -3,6 +3,7 @@ package net;
 import entities.Entity;
 import entities.Pawn;
 import entities.Player;
+import main.Common;
 import main.PlayerHandler;
 import main.PlayerHandler.CharacterCreateStatus;
 import map.MapChunk;
@@ -23,9 +24,7 @@ public class NetProtocol {
 	public static void srLoginReady(PlayerHandler cl){
 		PacketBuilder pb = new PacketBuilder();
 		pb.writeShort(OpCodes.SR_LOGIN_READY);
-		Packet pack = pb.getPacket();
-		cl.send(pack, false);
-		pack.clear();
+		cl.send(pb.getPacket(), true);
 	}
 	
 	/* Sends login status to client */
@@ -37,18 +36,14 @@ public class NetProtocol {
 		}else{
 			pb.writeShort((short)2);
 		}
-		Packet pack = pb.getPacket();
-		cl.send(pack, false);
-		pack.clear();
+		cl.send(pb.getPacket(), true);
 	}
 	
 	public static void srCharCount(PlayerHandler cl, short count){
 		PacketBuilder pb = new PacketBuilder();
 		pb.writeShort(OpCodes.SR_CHAR_COUNT);
 		pb.writeShort(count);
-		Packet pack = pb.getPacket();
-		cl.send(pack, false);
-		pack.clear();
+		cl.send(pb.getPacket(), true);
 	}
 	
 	/* Sends 'player entity' to client */
@@ -77,9 +72,7 @@ public class NetProtocol {
 			pb.writeShort((short)3);
 			break;
 		}
-		Packet pack = pb.getPacket();
-		cl.send(pack, false);
-		pack.clear();
+		cl.send(pb.getPacket(), true);
 	}
 	
 	/* Sends whole visible entity list to client */
@@ -99,9 +92,7 @@ public class NetProtocol {
 		PacketBuilder pb = new PacketBuilder();
 		pb.writeShort(OpCodes.SR_ENT_REMOVE);
 		pb.writeInt(entityId);
-		Packet pack = pb.getPacket();
-		cl.send(pack, false);
-		pack.clear();
+		cl.send(pb.getPacket(), true);
 	}
 	
 	/* Sends pawn position update to client */
@@ -112,14 +103,22 @@ public class NetProtocol {
 		pb.writeShort(EntityUpdates.POSITION);
 		pb.writeInt((int)pawn.getLocX());
 		pb.writeInt((int)pawn.getLocY());
-		Packet pack = pb.getPacket();
-		cl.send(pack, false);
-		pack.clear();
+		cl.send(pb.getPacket(), false);
 	}
 	
 	/* Sends map chunk to player */
 	public static void srMapChunk(PlayerHandler cl, MapChunk mc){
-		System.out.println("Sending chunk!");
 		cl.send(mc, true);
+	}
+	
+	/* Sends world size to client */
+	public static void srWorldSize(PlayerHandler cl){
+		PacketBuilder pb = new PacketBuilder();
+		pb.writeShort(OpCodes.SR_WORLD_SIZE);
+		pb.writeInt(Common.getMapManagerSt().getWorldWidth());
+		pb.writeInt(Common.getMapManagerSt().getWorldHeight());
+		pb.writeInt(Common.getMapManagerSt().getChunkWidth());
+		pb.writeInt(Common.getMapManagerSt().getChunkHeight());
+		cl.send(pb.getPacket(), true);
 	}
 }

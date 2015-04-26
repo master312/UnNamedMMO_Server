@@ -3,23 +3,11 @@ package main;
 import main.PlayerAction.PlayerActionType;
 import net.Packet;
 import entities.Entity;
+import entities.Entity.NetDirection;
 
 /* This class is used to create PlayerAction objects from raw packets 
  * Packet's OpCode MUST be readed before using functions from this class */
 public class PlayerActionGenerator {
-	
-	class NetDirection {
-		/* Direction ID's over network */
-		public static final int DIRECTION_NORT = 0;
-		public static final int DIRECTION_NORTHEAST = 1;
-		public static final int DIRECTION_EAST = 2;
-		public static final int DIRECTION_SOUTHEAST = 3;
-		public static final int DIRECTION_SOUTH = 4;
-		public static final int DIRECTION_SOUTHWEST = 5;
-		public static final int DIRECTION_WEST = 6;
-		public static final int DIRECTION_NORTHWEST = 7;
-	}
-	
 	
 	/* Generate player movement action from packet */
 	public static PlayerAction genMovement(Packet pack){

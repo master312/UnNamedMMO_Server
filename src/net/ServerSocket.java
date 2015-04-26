@@ -34,7 +34,7 @@ public class ServerSocket extends Listener{
 		tcpPort = _tcpPort;
 		udpPort = _udpPort;
 		maxConnections = _maxConnected;
-		server = new Server(301001, 301001);
+		server = new Server(64000, 64000);
 	}
 	
 	/* Start listening for clients */

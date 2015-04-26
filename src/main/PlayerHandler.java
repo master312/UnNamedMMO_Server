@@ -7,6 +7,7 @@ import java.util.List;
 
 import main.AccountsManager.Account;
 import main.CharactersManager.AccountCharacters;
+import map.MapChunk;
 import map.MapManager;
 import net.NetProtocol;
 import net.OpCodes;
@@ -74,6 +75,7 @@ public class PlayerHandler extends Listener{
 	/* List of map chunk positions this player needs */
 	private List<NeedMapChunk> neededChunks = 
 			Collections.synchronizedList(new ArrayList<NeedMapChunk>());
+	//private NeedMapChunk neededChunks[][] = new NeedMapChunk[3][3];
 	/* Whether new map chunks are needed to be send to player */
 	private boolean newMapChunks = false;
 	
@@ -84,6 +86,10 @@ public class PlayerHandler extends Listener{
 		client.addListener(this);
 		client.setKeepAliveTCP(Common.CONNECTION_TIMEOUT / 2);
 		state = PlayerState.CONNECTED;
+		
+//		for(int i = 0; i < 3; i++)
+//			for(int j = 0; j < 3; j++)
+//				neededChunks[i][j] = null;
 		
 		NetProtocol.srLoginReady(this);	//Sends ready signal to client
 	}
@@ -148,6 +154,7 @@ public class PlayerHandler extends Listener{
 				state = PlayerState.IN_GAME;
 				Common.addPlayerToListSt(this); //Add player to inGame list
 				character.setPlayerHandler(this);
+				NetProtocol.srWorldSize(this);	//Sends world, and chunk size
 				calcNeededChunks();
 			}
 			break;
@@ -160,6 +167,18 @@ public class PlayerHandler extends Listener{
 		switch(opCode){
 		case OpCodes.CL_MOVE:
 			actions.add(PlayerActionGenerator.genMovement(pack));
+			break;
+		case OpCodes.CL_REQUEST_MAP:
+			MapChunk tmpCh = Common.getMapManagerSt().getChunk(pack.readInt(), 
+																pack.readInt());
+			if(tmpCh != null){
+				NetProtocol.srMapChunk(this, tmpCh);
+			}else{
+				//TODO: send some error to client
+			}
+			break;
+		case OpCodes.CL_REQUEST_PAWN:
+			
 			break;
 		}
 	}
@@ -212,6 +231,15 @@ public class PlayerHandler extends Listener{
 										.removeEntityFromInRangeList(character);
 			}
 		}
+//		for(int i = 0; i < 3; i++){
+//			for(int j = 0; j < 3; j++){
+//				NeedMapChunk tmpC = neededChunks[i][j];
+//				if(tmpC != null){ 
+//					Common.getMapManagerSt()
+//							.rempvePlayerFromChunk(tmpC.x, tmpC.y);
+//				}
+//			}
+//		}
 		state = PlayerState.DISCONNECTED;
 		disconnectTime = System.currentTimeMillis();
 		entitiesInRange = null;
@@ -252,28 +280,46 @@ public class PlayerHandler extends Listener{
 		if(start.y >= end.y)
 			start.y = end.y - 2;
 		
-		List<NeedMapChunk> tmpList = new ArrayList<NeedMapChunk>();
-		
-		for(int i = start.x; i <= end.x; i++){
-			for(int j = start.y; j <= end.y; j++){
-				NeedMapChunk tmpChunk = new NeedMapChunk(i, j);
-				tmpList.add(tmpChunk);
+		if(neededChunks.size() == 0){
+			for(int i = start.x; i <= end.x; i++){
+				for(int j = start.y; j <= end.y; j++){
+					neededChunks.add(new NeedMapChunk(i, j));
+				}
 			}
+			newMapChunks = true;
+			return;
 		}
 		
 		for(int i = 0; i < neededChunks.size(); i++){
-			int index = tmpList.indexOf(neededChunks.get(i));
-			if(index == -1){
+			NeedMapChunk tmpC = neededChunks.get(i);
+			if(tmpC.x >= start.x && tmpC.x <= end.x &&
+					tmpC.y >= start.y && tmpC.y <= end.y){
+				//Chunk is needed
 				continue;
+			}else{
+				//Chunk is not needed
+				Common.getMapManagerSt().rempvePlayerFromChunk(tmpC.x, tmpC.y);
+				neededChunks.remove(i);
 			}
-			if(neededChunks.get(i).equals(tmpList.get(index))){
-				if(neededChunks.get(i).isSend){
-					tmpList.get(index).isSend = true;
+		}
+		int minInListX = neededChunks.get(0).x;
+		int minInListY = neededChunks.get(0).y;
+		int maxInListX = neededChunks.get(neededChunks.size() - 1).x;
+		int maxInListY = neededChunks.get(neededChunks.size() - 1).y;
+		
+		for(int i = start.x; i <= end.x; i++){
+			for(int j = start.y; j <= end.y; j++){
+				if(i >= minInListX && i <= maxInListX 
+						&& j >= minInListY && j <= maxInListY){
+					//Chunk already on list
+					continue;
+				}else{
+					NeedMapChunk tmp = new NeedMapChunk(i, j);
+					neededChunks.add(tmp);
+					newMapChunks = true;
 				}
 			}
 		}
-		newMapChunks = true;
-		neededChunks = tmpList;
 	}
 	
 	public long getDisconnectTime() {
@@ -369,33 +415,16 @@ public class PlayerHandler extends Listener{
 	public List<NeedMapChunk> getNeedChunks() {
 		return neededChunks;
 	}
-
-	/* Add new chunk to neededChunks */
-	public void addNeededChunk(int x, int y){
-		neededChunks.add(new NeedMapChunk(x, y));
-	}
 	
 	/* Return NeedMapChunk object 
 	 * Returns null if not found */
 	public NeedMapChunk getNeededChunk(int x, int y){
 		for(int i = 0; i < neededChunks.size(); i++){
-			NeedMapChunk tmpChunk = neededChunks.get(i);
-			if(tmpChunk.x == x && tmpChunk.y == y){
-				return tmpChunk;
-			}
+			NeedMapChunk tmpC = neededChunks.get(i);
+			if(tmpC.x == x && tmpC.y == y)
+				return tmpC;
 		}
 		return null;
-	}
-	
-	/* Removes this chunk from needed chunks list */
-	public void removeNeededChunk(int x, int y){
-		for(int i = 0; i < neededChunks.size(); i++){
-			NeedMapChunk tmpChunk = neededChunks.get(i);
-			if(tmpChunk.x == x && tmpChunk.y == y){
-				neededChunks.remove(i);
-				return;
-			}
-		}
 	}
 	
 	/* Returns whether new map chunks needs to be send to player */

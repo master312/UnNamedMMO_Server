@@ -12,6 +12,17 @@ public class Entity {
 		WEST { public String toString() { return "WEST"; } }, 
 		NORTHWEST { public String toString() { return "NORTHWEST"; } }
 	}
+	public static class NetDirection {
+		/* Direction ID's over network */
+		public static final int DIRECTION_NORT = 0;
+		public static final int DIRECTION_NORTHEAST = 1;
+		public static final int DIRECTION_EAST = 2;
+		public static final int DIRECTION_SOUTHEAST = 3;
+		public static final int DIRECTION_SOUTH = 4;
+		public static final int DIRECTION_SOUTHWEST = 5;
+		public static final int DIRECTION_WEST = 6;
+		public static final int DIRECTION_NORTHWEST = 7;
+	}
 	public enum EntityType{
 		UNDEFINED{ public String toString(){ return "UNDEFINED"; } }, 
 		MONSTER{ public String toString(){ return "MONSTER"; } },

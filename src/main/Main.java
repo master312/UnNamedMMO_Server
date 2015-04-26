@@ -80,6 +80,7 @@ public class Main {
 		while(true){
 			Common.clearTick();
 			Common.getGameManagerSt().visibilityUpdate();
+			Common.getMapManagerSt().update();	//Map update. Mostly used to clear not needed maps
 			threadSleep(200);	//This thread ticks 5 times pre secound
 		}
 	}

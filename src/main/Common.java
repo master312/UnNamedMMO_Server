@@ -29,6 +29,11 @@ public class Common {
 	public static final int MAXIMUM_ACC_CHAR_NUMBER = 5;
 	/* View distance in pixels */
 	public static final int ENTITY_VIEW_DISTANCE = 4000;
+	/* Chunks clear interval. Map manager will check for timeouted chunks
+	 * on this interval (in ms) */
+	public static final int CHUNKS_CLEAR_INTERVAL = 15000;
+	/* Time before chunk timeout (in ms) */
+	public static final int CHUNK_TIMEOUT = 30000;
 	
 	private ServerSocket serverSocket = null;
 	private AccountsManager accountManager = null;
@@ -53,7 +58,7 @@ public class Common {
 		gameManager = new GameManager();
 		mapManager = new MapManager();
 		
-		mapManager.initWorld();	//This will not be here. Its here just for testing
+		mapManager.initWorld(-1, -1);	//TODO: This will not be here. Its here just for testing
 	}
 	
 	public ServerSocket getServer(){
