@@ -36,7 +36,7 @@ public class Entity {
 	private int width = 0, height = 0;
 	private int spriteId = -1;
 	private String name = "";
-	
+	private Direction dir = Direction.NORTH;
 	
 	public Entity(){
 	}
@@ -49,6 +49,66 @@ public class Entity {
 	public void move(float x, float y){
 		locX += x;
 		locY += y;
+	}
+
+	public Direction getDir() {
+		return dir;
+	}
+
+	public void setDir(Direction dir) {
+		this.dir = dir;
+	}
+	
+	/* Return direction id to be send over network */
+	public short getNetDir(){
+		switch(dir){
+		case NORTH:
+			return NetDirection.DIRECTION_NORT;
+		case NORTHEAST:
+			return NetDirection.DIRECTION_NORTHEAST;
+		case EAST:
+			return NetDirection.DIRECTION_EAST;
+		case SOUTHEAST:
+			return NetDirection.DIRECTION_SOUTHEAST;
+		case SOUTH:
+			return NetDirection.DIRECTION_SOUTH;
+		case SOUTHWEST:
+			return NetDirection.DIRECTION_SOUTHWEST;
+		case WEST:
+			return NetDirection.DIRECTION_WEST;
+		case NORTHWEST:
+			return NetDirection.DIRECTION_NORTHWEST;
+		}
+		return -1;
+	}
+	
+	public void setNetDir(short netDir){
+		switch(netDir){
+		case NetDirection.DIRECTION_NORT:
+			dir = Direction.NORTH;
+			break;
+		case NetDirection.DIRECTION_NORTHEAST:
+			dir = Direction.NORTHEAST;
+			break;
+		case NetDirection.DIRECTION_EAST:
+			dir = Entity.Direction.EAST;
+			break;
+		case NetDirection.DIRECTION_SOUTHEAST:
+			dir = Entity.Direction.SOUTHEAST;
+			break;
+		case NetDirection.DIRECTION_SOUTH:
+			dir = Direction.SOUTH;
+			break;
+		case NetDirection.DIRECTION_SOUTHWEST:
+			dir = Direction.SOUTHWEST;
+			break;
+		case NetDirection.DIRECTION_WEST:
+			dir = Direction.WEST;
+			break;
+		case NetDirection.DIRECTION_NORTHWEST:
+			dir = Direction.NORTHWEST;
+			break;
+		}
 	}
 	
 	public EntityType getType() {

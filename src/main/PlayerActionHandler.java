@@ -74,8 +74,16 @@ public class PlayerActionHandler {
 			entity.move(-speed, -speed);
 			break;
 		}
-		//Send new position back to player
-		NetProtocol.srPawnUpdatePosition(pl, entity);
+		boolean toSendDir = false;
+		if(entity.getDir() != dir){
+			//Send direction and position update
+			entity.setDir(dir);
+			NetProtocol.srPawnUpdatePosDir(pl, entity);
+			toSendDir = true;
+		}else{
+			//Send new position back to player
+			NetProtocol.srPawnUpdatePosition(pl, entity);
+		}
 		
 		//Checking if player has moved to new chunk
 		Point newChunk = tmpM.pixelToChunk((int)entity.getLocX(), 
@@ -91,9 +99,15 @@ public class PlayerActionHandler {
 			if(!tmpEntity.isPlayer()){
 				continue;
 			}
-			NetProtocol.srPawnUpdatePosition(
-									((Player) tmpEntity).getPlayerHandler(), 
-									entity);
+			if(!toSendDir){
+				NetProtocol.srPawnUpdatePosition(
+						((Player) tmpEntity).getPlayerHandler(), 
+						entity);
+			}else{
+				NetProtocol.srPawnUpdatePosDir(
+						((Player) tmpEntity).getPlayerHandler(), 
+						entity);
+			}
 		}
 	}
 }

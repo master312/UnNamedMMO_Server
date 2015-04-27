@@ -51,7 +51,4 @@ public class Pawn extends Entity {
 	public void setCurrentSpeed(int currentSpeed) {
 		this.currentSpeed = currentSpeed;
 	}
-	
-	
-	
 }

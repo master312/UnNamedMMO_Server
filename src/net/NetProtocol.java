@@ -18,6 +18,7 @@ public class NetProtocol {
 	class EntityUpdates{
 		public static final short POSITION = 1;
 		public static final short DIRECTION = 2;
+		public static final short POS_DIR = 3;	//Position and direction
 	}
 	
 	/* Sends server ready packet to client */
@@ -103,6 +104,28 @@ public class NetProtocol {
 		pb.writeShort(EntityUpdates.POSITION);
 		pb.writeInt((int)pawn.getLocX());
 		pb.writeInt((int)pawn.getLocY());
+		cl.send(pb.getPacket(), false);
+	}
+	
+	/* Sends pawn direction update to client */
+	public static void srPawnUpdateDirection(PlayerHandler cl, Pawn pawn){
+		PacketBuilder pb = new PacketBuilder();
+		pb.writeShort(OpCodes.SR_PAWN_UPDATE);
+		pb.writeInt(pawn.getId());
+		pb.writeShort(EntityUpdates.DIRECTION);
+		pb.writeShort(pawn.getNetDir());
+		cl.send(pb.getPacket(), false);
+	}
+	
+	/* Sends pawn direction update to client */
+	public static void srPawnUpdatePosDir(PlayerHandler cl, Pawn pawn){
+		PacketBuilder pb = new PacketBuilder();
+		pb.writeShort(OpCodes.SR_PAWN_UPDATE);
+		pb.writeInt(pawn.getId());
+		pb.writeShort(EntityUpdates.POS_DIR);
+		pb.writeInt((int)pawn.getLocX());
+		pb.writeInt((int)pawn.getLocY());
+		pb.writeShort(pawn.getNetDir());
 		cl.send(pb.getPacket(), false);
 	}
 	
