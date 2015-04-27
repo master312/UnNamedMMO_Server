@@ -1,7 +1,5 @@
 package main;
 
-import com.esotericsoftware.minlog.Log;
-
 import main.PlayerAction.PlayerActionType;
 import net.Packet;
 import entities.Entity;
