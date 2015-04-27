@@ -144,4 +144,15 @@ public class NetProtocol {
 		pb.writeInt(Common.getMapManagerSt().getChunkHeight());
 		cl.send(pb.getPacket(), true);
 	}
+	
+	/* Sends text message to client */
+	public static void srTextMsg(PlayerHandler cl, short type, String sender, 
+									String msg){
+		PacketBuilder pb = new PacketBuilder();
+		pb.writeShort(OpCodes.SR_TEXT_MSG);
+		pb.writeShort(type);
+		pb.writeString(sender);
+		pb.writeString(msg);
+		cl.send(pb.getPacket(), true);
+	}
 }

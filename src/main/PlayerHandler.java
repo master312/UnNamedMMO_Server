@@ -24,7 +24,8 @@ import entities.Player;
  * and handles packet sending/receiving 
  * Client object, packets objects .... 
  * WARNING: This class object is added to 'preGamePlayers' list in common
- * on its creation. Don't forget to delete it */
+ * on its creation. Don't forget to delete it 
+ * TODO: Optimise. Make new list for other player entities */
 public class PlayerHandler extends Listener{
 	public enum PlayerState{
 		CONNECTED, LOGGED_IN, CHARACTER_SCREEN, IN_GAME, DISCONNECTED
@@ -114,7 +115,8 @@ public class PlayerHandler extends Listener{
 		disconnect();
 	}
 
-	/* Handle packets used before player switch to in game state */
+	/* Handle packets received from player
+	 *  used before player switch to in game state */
 	public void handlePreGameNetwork(Packet pack){
 		if(pack.data.length < 2){
 			Log.warn("Invalid packet received from client " + client.getID());
@@ -156,7 +158,7 @@ public class PlayerHandler extends Listener{
 		}
 	}
 	
-	/* Handle packets used inGame */
+	/* Handle packets received from player, used inGame */
 	public void handleInGameNetwork(Packet pack){
 		short opCode = pack.readShort();
 		switch(opCode){
@@ -174,6 +176,14 @@ public class PlayerHandler extends Listener{
 			break;
 		case OpCodes.CL_REQUEST_PAWN:
 			
+			break;
+		case OpCodes.CL_CHAT_MSG:
+			PlayerAction tmpAct = PlayerActionGenerator.genChat(pack);
+			if(tmpAct == null){
+				Log.warn("Invalid chat message received from player " + getName());
+				return;
+			}
+			actions.add(tmpAct);
 			break;
 		}
 	}
@@ -366,11 +376,15 @@ public class PlayerHandler extends Listener{
 	
 	/* Adds entity to list of visible entities*/
 	public void addEntityToInRangeList(Entity e){
+		if(e == null)
+			return;
 		entitiesInRange.add(e);
 	}
 	
 	/* Remove entity from list of visible entities */
 	public void removeEntityFromInRangeList(Entity e){
+		if(e == null)
+			return;
 		entitiesInRange.remove(e);
 	}
 	
@@ -427,6 +441,13 @@ public class PlayerHandler extends Listener{
 	
 	public void setNewMapChunks(boolean b){
 		newMapChunks = b;
+	}
+	
+	/* Returns character name of this player */
+	public String getName(){
+		if(character == null)
+			return "";
+		return character.getName();
 	}
 	
 	public boolean equals(Object obj){

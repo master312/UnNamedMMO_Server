@@ -36,6 +36,9 @@ public class PlayerActionHandler {
 		case MOVE:
 			handlePlayerMovement(pl, (Direction)act.values.get(0));
 			break;
+		case CHAT:
+			handlePlayerChat(pl, act);
+			break;
 		default:
 			break;
 		}
@@ -99,15 +102,33 @@ public class PlayerActionHandler {
 			if(!tmpEntity.isPlayer()){
 				continue;
 			}
+			PlayerHandler ph = ((Player) tmpEntity).getPlayerHandler();
 			if(!toSendDir){
-				NetProtocol.srPawnUpdatePosition(
-						((Player) tmpEntity).getPlayerHandler(), 
-						entity);
+				NetProtocol.srPawnUpdatePosition(ph, entity);
 			}else{
-				NetProtocol.srPawnUpdatePosDir(
-						((Player) tmpEntity).getPlayerHandler(), 
-						entity);
+				NetProtocol.srPawnUpdatePosDir(ph, entity);
 			}
+		}
+	}
+	
+	private static void handlePlayerChat(PlayerHandler pl, PlayerAction act){
+		short msgType = (short)act.values.get(0);
+		String msg = (String)act.values.get(1);
+		
+		//TODO: Some cheat and anti-spam check here
+		//But better do it in action generator, or even in PlayerHandler
+		
+		//Return message to player
+		NetProtocol.srTextMsg(pl, msgType, pl.getName(), msg);
+		
+		for(int i = 0; i < pl.getEntitiesInRange().size(); i++){
+			//Relay message back to all visible clients
+			Entity tmpEntity = pl.getEntitiesInRange().get(i);
+			if(!tmpEntity.isPlayer()){
+				continue;
+			}
+			NetProtocol.srTextMsg(((Player) tmpEntity).getPlayerHandler(), 
+								  msgType, pl.getName(), msg);
 		}
 	}
 }

@@ -60,7 +60,7 @@ public class GameManager {
 			/* Is this current player visible to player we are making list for */
 			boolean isVisible = pl.isOnRangeList(tmpPlayer.getCharacter());
 			Player tmpChar = tmpPlayer.getCharacter();
-			if(Common.isInRange(pl.getCharacter(), tmpChar)){
+			if(GameMath.isInVisibleRange(pl.getCharacter(), tmpChar)){
 				if(isVisible)
 					continue;
 				pl.addEntityToInRangeList(tmpChar);

@@ -28,6 +28,9 @@ public class OpCodes {
 	/* Sends world size(in chunks) to client 
 	 * SR_WORLD_SIZE (int)worldWidth (int)worldHeight (int)chunkWidht (int)cHeight*/
 	public static final short SR_WORLD_SIZE = 0x0007;
+	/* Sends text message to player. Used for chat messages 
+	 * SR_TEXT_MSG (short)type (string)sender (String)message */
+	public static final short SR_TEXT_MSG = 0x0008;
 	
 	/* ********************* Client to server OpCodes ************************/
 	
@@ -48,4 +51,7 @@ public class OpCodes {
 	/* Request map chunk 
 	 * CL_REQUEST_MAP (int)chunkX (int)chunkY */
 	public static final short CL_REQUEST_MAP = 0x0005;
+	/* Client sends text message 
+	 * CL_CHAT_MSG (short)msgType (string) message*/
+	public static final short CL_CHAT_MSG = 0x0006;
 }

@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
 
-import entities.Entity;
 import main.PlayerHandler.PlayerState;
 import map.MapManager;
 import net.ServerSocket;
@@ -152,15 +151,6 @@ public class Common {
 	
 	public static void removePlayerSt(PlayerHandler player){
 		commonClass.removePlayer(player);
-	}
-	
-	/* Returns whether those two entities are visible to each other */
-	public static boolean isInRange(Entity e1, Entity e2){
-		return (int)Math.sqrt((e1.getLocX() - e2.getLocX()) * 
-							(e1.getLocX() - e2.getLocX()) + 
-							(e1.getLocY() - e2.getLocY()) *
-							(e1.getLocY() - e2.getLocY())) 
-							< ENTITY_VIEW_DISTANCE;
 	}
 	
 	/* Called on interval. This funciton clear all inactive player objects */

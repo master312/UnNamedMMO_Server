@@ -1,5 +1,7 @@
 package main;
 
+import com.esotericsoftware.minlog.Log;
+
 import main.PlayerAction.PlayerActionType;
 import net.Packet;
 import entities.Entity;
@@ -8,6 +10,11 @@ import entities.Entity.NetDirection;
 /* This class is used to create PlayerAction objects from raw packets 
  * Packet's OpCode MUST be readed before using functions from this class */
 public class PlayerActionGenerator {
+
+	public class ChatType{
+		public static final short SAY = 0;
+		public static final short YEL = 1;
+	}
 	
 	/* Generate player movement action from packet */
 	public static PlayerAction genMovement(Packet pack){
@@ -39,6 +46,18 @@ public class PlayerActionGenerator {
 			tmpAction.values.add(Entity.Direction.NORTHWEST);
 			break;
 		}
+		return tmpAction;
+	}
+	
+	public static PlayerAction genChat(Packet pack){
+		short type = pack.readShort();
+		String msg = pack.readString();
+		if(msg == ""){
+			return null;
+		}
+		PlayerAction tmpAction = new PlayerAction(PlayerActionType.CHAT);
+		tmpAction.values.add(type);
+		tmpAction.values.add(msg);
 		return tmpAction;
 	}
 }

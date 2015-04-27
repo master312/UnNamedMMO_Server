@@ -6,7 +6,7 @@ import java.util.List;
 public class PlayerAction {
 	
 	public enum PlayerActionType{
-		NOTHING, MOVE
+		NOTHING, MOVE, CHAT
 	}
 	
 	public PlayerActionType type;
