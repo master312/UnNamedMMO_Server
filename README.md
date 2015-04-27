@@ -1,4 +1,3 @@
 # UnNamedMMO_Server
-Server for UnNamed MMO
-
-TODO
+Open world MMO game server writen in java.
+Project is still in very early phase
