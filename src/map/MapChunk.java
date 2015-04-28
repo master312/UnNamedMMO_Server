@@ -1,6 +1,13 @@
 package map;
 
-import com.esotericsoftware.kryo.serializers.FieldSerializer.Optional;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.Random;
+import java.util.zip.Deflater;
+
+import net.OpCodes;
+import net.Packet;
+import net.PacketBuilder;
 
 public class MapChunk {
 	public enum Layer{
@@ -9,14 +16,7 @@ public class MapChunk {
 	/* Dimensions of one tile, in pixels */
 	public static final int TILE_WIDTH = 32;
 	public static final int TILE_HEIGHT = 32;
-	/* Number of bottom layers, excluding ground - Must be at least one
-	 * (Layers that are drawn under player) */
-	public static final int BOTTOM_LAYERS = 3;
-	/* Number of top layers - Must be at least one
-	 * (Layers that are drawn over player) */
-	public static final int TOP_LAYERS = 2;
 	
-	//@Optional(value = "")	//Tells network serializer to ignore this variable
 	private int width = 0;
 	private int height = 0;
 	
@@ -27,11 +27,11 @@ public class MapChunk {
 	private int locY = 0;
 	
 	/* Number of players on this map */
-	@Optional(value = "")	//Tells network serializer to ignore this variable
 	private int playersNum = 0;
 	/* Time when this chunk started to timeout */
-	@Optional(value = "")
 	private long timeoutStart = 0;
+	/* Compressed pacekt of this map, to be send over network */
+	private Packet pack = null;
 	
 	public MapChunk() { }
 	
@@ -44,7 +44,6 @@ public class MapChunk {
 	
 	public void initEmpty(){
 		tiles = new Tile[width][height];
-
 		for(int i = 0; i < width; i++){
 			for(int j = 0; j < height; j++){
 				if(i == 0 || j == 0){
@@ -54,9 +53,51 @@ public class MapChunk {
 				}
 			}
 		}
+		generatePacket();
 	}
 	
 	public void fillLayer(int tile, Layer layer, int layerNumber){		
+	}
+	
+	/* Generates compressed packet to be send over network */
+	private void generatePacket(){
+		PacketBuilder pb = new PacketBuilder();
+		pb.writeInt(getTilesetId());
+		pb.writeInt(getLocX());
+		pb.writeInt(getLocY());
+		for(int i = 0; i < getWidth(); i++){
+			for(int j = 0; j < getHeight(); j++){
+				Tile t = getTile(i, j);
+				pb.writeShort(t.getGround());
+				for(int g = 0; g < Tile.BOTTOM_LAYERS; g++){
+					pb.writeShort(t.getBottom(g));
+				}
+				for(int g = 0; g < Tile.TOP_LAYERS; g++){
+					pb.writeShort(t.getTop(g));
+				}
+			}
+		}
+		/* Compress map data */
+		Packet tmpPack = pb.getPacket();
+		Deflater compressor = new Deflater();
+		compressor.setLevel(Deflater.BEST_COMPRESSION);
+		compressor.setInput(tmpPack.data);
+		compressor.finish();
+		ByteArrayOutputStream bos = new ByteArrayOutputStream(tmpPack.data.length);
+		byte buf[] = new byte[1024];
+	    while (!compressor.finished()) {
+	        int count = compressor.deflate(buf);
+	        bos.write(buf, 0, count);
+	    }
+	    try {
+	        bos.close();
+	    } catch (IOException e) { }
+	    byte[] compressedData = bos.toByteArray();
+		/* Create map packet */
+		pb = new PacketBuilder();
+		pb.writeShort(OpCodes.SR_MAP_CHUNK);
+		pb.writeBytes(compressedData);
+		pack = pb.getPacket();
 	}
 	
 	public void addPlayer() { 
@@ -70,6 +111,12 @@ public class MapChunk {
 			timeoutStart = System.currentTimeMillis();
 		}
 	}
+	
+	
+	
+	public Packet getPack() { return pack; }
+
+	public Tile getTile(int x, int y){ return tiles[x][y]; }
 	
 	public long getTimeout() { return timeoutStart; }
 	

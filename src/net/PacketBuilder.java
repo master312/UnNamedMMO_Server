@@ -37,6 +37,11 @@ public class PacketBuilder {
 		size += tmp.length + 2;
 	}
 	
+	public void writeBytes(byte[] value){
+		data.add(value);
+		size += value.length;
+	}
+	
 	public Packet getPacket(){
 		Packet tmp = new Packet();
 		tmp.data = new byte[size];

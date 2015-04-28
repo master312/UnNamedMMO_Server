@@ -7,6 +7,7 @@ import main.Common;
 import main.PlayerHandler;
 import main.PlayerHandler.CharacterCreateStatus;
 import map.MapChunk;
+import map.Tile;
 
 /* This class package network packets */
 public class NetProtocol {
@@ -131,7 +132,43 @@ public class NetProtocol {
 	
 	/* Sends map chunk to player */
 	public static void srMapChunk(PlayerHandler cl, MapChunk mc){
-		cl.send(mc, true);
+//		PacketBuilder pb = new PacketBuilder();
+//		pb.writeShort((short)0x0666);
+//		pb.writeInt(mc.getTilesetId());
+//		pb.writeInt(mc.getLocX());
+//		pb.writeInt(mc.getLocY());
+//		for(int i = 0; i < mc.getWidth(); i++){
+//			for(int j = 0; j < mc.getHeight(); j++){
+//				Tile t = mc.getTile(i, j);
+//				pb.writeShort(t.getGround());
+//				for(int g = 0; g < MapChunk.BOTTOM_LAYERS; g++){
+//					pb.writeShort(t.getBottom(g));
+//				}
+//				for(int g = 0; g < MapChunk.TOP_LAYERS; g++){
+//					pb.writeShort(t.getTop(g));
+//				}
+//			}
+//		}
+//		Deflater compressor = new Deflater();
+//		compressor.setLevel(Deflater.BEST_COMPRESSION);
+//		compressor.setInput(pb.getPacket().data);
+//		compressor.finish();
+//		
+//		ByteArrayOutputStream bos = new ByteArrayOutputStream(pb.getPacket().data.length);
+//		byte buf[] = new byte[1024];
+//	    while (!compressor.finished()) {
+//	        int count = compressor.deflate(buf);
+//	        bos.write(buf, 0, count);
+//	    }
+//	    try {
+//	        bos.close();
+//	    } catch (IOException e) {
+//	    }
+//	    byte[] compressedData = bos.toByteArray();
+//		
+//		Log.info("PACKSIZE: " + compressedData.length + " X:" + mc.getLocX() + " Y:" + mc.getLocY());
+//		cl.send(mc, true);
+		cl.send(mc.getPack(), true);
 	}
 	
 	/* Sends world size to client */

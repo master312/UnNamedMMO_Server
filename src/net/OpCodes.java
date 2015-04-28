@@ -31,6 +31,8 @@ public class OpCodes {
 	/* Sends text message to player. Used for chat messages 
 	 * SR_TEXT_MSG (short)type (string)sender (String)message */
 	public static final short SR_TEXT_MSG = 0x0008;
+	/* Sends map chunk to client */
+	public static final short SR_MAP_CHUNK = 0x0009;
 	
 	/* ********************* Client to server OpCodes ************************/
 	

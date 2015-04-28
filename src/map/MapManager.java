@@ -132,6 +132,7 @@ public class MapManager {
 				NetProtocol.srMapChunk(pHandler, getChunk(tmpC.x, tmpC.y));
 				addPlayerToChunk(tmpC.x, tmpC.y);
 				tmpC.isSend = true;
+				break;
 			}
 		}
 	}

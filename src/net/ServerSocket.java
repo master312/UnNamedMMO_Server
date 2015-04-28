@@ -3,9 +3,6 @@ package net;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import map.MapChunk;
-import map.Tile;
-
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.kryonet.Server;
@@ -48,17 +45,9 @@ public class ServerSocket extends Listener{
 		server.getKryo().register(entities.Entity.EntityType.class);
 		server.getKryo().register(entities.Entity.Direction.class);
 		
-		server.getKryo().register(MapChunk.class);
-		server.getKryo().register(MapChunk.Layer.class);
-		server.getKryo().register(Tile.class);
-		server.getKryo().register(Tile[].class);
-		server.getKryo().register(Tile[][].class);
-		server.getKryo().register(short[].class);
-		
 		server.bind(tcpPort, udpPort);
 		server.start();
 		server.addListener(this);
-		//Log.DEBUG("Server started..."); //Not needed. Kryonet have its own loging system
 	}
 	
 	/* This is run when new client is connected */
